@@ -89,8 +89,6 @@ async function registerUser(email, password) {
   }
 }
 
-// registerUser('sergioges@gmail.com', '10para-Esplugues');
-
 async function loginUser(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
