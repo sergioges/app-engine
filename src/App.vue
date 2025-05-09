@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, reactive } from 'vue';
 
 import moment from 'moment';
 import 'moment/dist/locale/es';
@@ -20,7 +20,24 @@ const icons = [
     'mdi-instagram',
   ]
 
-const date = ref();
+const date = ref([]);
+const hosts = ref(1);
+const pets = ref('No');
+const form = ref(null);
+const contactData = reactive({
+  name: '',
+  email: '',
+  phone: ''
+});
+
+const emailValidation = ref ([
+  v => !!v || 'Falta tu email',
+  v => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v) || 'Email inválido'
+]);
+const phoneValidation = ref ([
+  v => !!v || 'Falta tu teléfono',
+  v => /^\+?[1-9]\d{1,14}$/.test(v) || 'Teléfono inválido'
+]);
 
 const isMobile = computed(() => display.smAndDown);
 const isDesktop = computed(() => display.mdAndUp); 
@@ -55,6 +72,21 @@ const disabledDates = computed(() => {
 
   return [tomorrow, afterTomorrow]
 })
+
+async function sendData() {
+  const { valid } = await form.value.validate()
+  if (valid) {
+    alert(`Reserva solicitada para ${hosts.value} huéspedes y ${pets.value} mascotas. \nFechas: ${formattedDate.value}`);
+    resetData()
+  } 
+}
+
+async function resetData () {
+  await form.value.reset()
+  pets.value = 'No'
+  hosts.value = 1
+  date.value = null
+  }
 </script>
 
 <template>
@@ -76,12 +108,14 @@ const disabledDates = computed(() => {
           inline 
           auto-apply
         />
-        <v-form>
+        <v-form ref="form" class="mb-4">
           <v-row>
             <v-col class="d-flex flex-column ga-4 mb-4" cols="12" md="12">
               <v-text-field 
                 v-model="formattedDate" 
                 label="Check-in --- Check-out" 
+                :rules="[v => !!v || 'Falta escoger fechas']"
+                required
                 prepend-icon="mdi-calendar" 
                 hide-details="auto"
                 variant="solo">
@@ -90,6 +124,7 @@ const disabledDates = computed(() => {
               <v-row>
                 <v-col cols="12" md="6">
                   <v-number-input
+                    v-model="hosts"
                     :reverse="false"
                     controlVariant="split"
                     label="Número de huéspedes"
@@ -103,6 +138,7 @@ const disabledDates = computed(() => {
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-select
+                    v-model="pets"
                     label="¿Llevas mascotas?"
                     :items="['Si', 'No']"
                     prepend-icon="mdi-paw" 
@@ -113,18 +149,27 @@ const disabledDates = computed(() => {
               </v-row>
               <p>Datos de contacto</p>
               <v-text-field 
+                v-model="contactData.name"
+                required
+                :rules="[v => !!v || 'Falta tu nombre']"
                 label="Nombre" 
                 prepend-icon="mdi-account-box-edit-outline" 
                 hide-details="auto"
                 variant="solo">
               </v-text-field>
-              <v-text-field 
+              <v-text-field   
+                v-model="contactData.email"
+                required
+                :rules="emailValidation"
                 label="Email" 
                 prepend-icon="mdi-email" 
                 hide-details="auto"
                 variant="solo">
               </v-text-field>
               <v-text-field 
+                v-model="contactData.phone"
+                required
+                :rules="phoneValidation"
                 label="Teléfono" 
                 prepend-icon="mdi-phone" 
                 hide-details="auto"
@@ -132,6 +177,23 @@ const disabledDates = computed(() => {
               </v-text-field>
             </v-col>
           </v-row>
+          <v-btn
+            class="mt-4"
+            color="success"
+            block
+            @click="sendData"
+          >
+            Solicitar reserva
+          </v-btn>
+
+          <v-btn
+            class="mt-4"
+            color="error"
+            block
+            @click="resetData"
+          >
+            Borrar
+          </v-btn>
         </v-form>
       </v-col>
     </v-row>
