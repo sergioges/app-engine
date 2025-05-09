@@ -1,6 +1,13 @@
 <script setup>
 import { ref, computed, reactive } from 'vue';
 
+import { auth } from './plugins/firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+
+import { db } from './plugins/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+
 import moment from 'moment';
 import 'moment/dist/locale/es';
 
@@ -73,12 +80,56 @@ const disabledDates = computed(() => {
   return [tomorrow, afterTomorrow]
 })
 
+async function registerUser(email, password) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log('Usuario registrado:', userCredential.user);
+  } catch (error) {
+    console.error('Error al registrar usuario:', error.message);
+  }
+}
+
+// registerUser('sergioges@gmail.com', '10para-Esplugues');
+
+async function loginUser(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log('Usuario autenticado:', userCredential.user);
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error.message);
+  }
+}
+
+loginUser('sergioges@gmail.com', '10para-Esplugues');
+
+// firebase deploy --only hosting:reservas-cuca-de-llum
+
 async function sendData() {
-  const { valid } = await form.value.validate()
+  const { valid } = await form.value.validate();
   if (valid) {
-    alert(`Reserva solicitada para ${hosts.value} huéspedes y ${pets.value} mascotas. \nFechas: ${formattedDate.value}`);
-    resetData()
-  } 
+    try {
+      // Datos a guardar en Firestore
+      const reservationData = {
+        name: contactData.name,
+        email: contactData.email,
+        phone: contactData.phone,
+        hosts: hosts.value,
+        pets: pets.value,
+        dates: formattedDate.value,
+        totalNights: totalNights.value,
+        createdAt: new Date() // Fecha de creación
+      };
+
+      // Guarda los datos en la colección "reservations"
+      await addDoc(collection(db, 'reservations'), reservationData);
+
+      alert('Reserva guardada exitosamente en Firebase!');
+      resetData();
+    } catch (error) {
+      console.error('Error al guardar la reserva:', error);
+      alert('Hubo un error al guardar la reserva. Inténtalo de nuevo.');
+    }
+  }
 }
 
 async function resetData () {
