@@ -23,6 +23,3 @@ console.log('Firebase Config:', firebaseConfig);
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
-
-// firebase functions:config:get --> Get API keys
-// firebase functions:config:set config

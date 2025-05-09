@@ -102,8 +102,6 @@ async function loginUser(email, password) {
 
 loginUser('sergioges@gmail.com', '10para-Esplugues');
 
-// firebase deploy --only hosting:reservas-cuca-de-llum
-
 async function sendData() {
   const { valid } = await form.value.validate();
   if (valid) {

@@ -2,6 +2,11 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
+// firebase functions:config:get --> Get API keys
+// firebase functions:config:set --> Set API keys
+// firebase functions:config:unset --> Unset API keys
+// firebase deploy --only hosting:reservas-cuca-de-llum
+
 // Configuración de Firebase (reemplaza con tus credenciales)
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_CONFIG_API_KEY,
