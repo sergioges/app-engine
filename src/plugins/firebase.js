@@ -6,16 +6,17 @@ import { getAuth } from 'firebase/auth';
 // firebase functions:config:set --> Set API keys
 // firebase functions:config:unset --> Unset API keys
 // firebase deploy --only hosting:reservas-cuca-de-llum
+// firebase deploy --only functions
 
 // Configuración de Firebase (reemplaza con tus credenciales)
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_CONFIG_API_KEY,
-    authDomain: import.meta.env.VITE_CONFIG_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_CONFIG_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_CONFIG_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_CONFIG_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_CONFIG_APP_ID,
-    measurementId: import.meta.env.VITE_CONFIG_MEASUREMENT_ID,
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Inicializa Firebase

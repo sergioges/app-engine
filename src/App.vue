@@ -100,7 +100,7 @@ async function loginUser(email, password) {
   }
 }
 
-loginUser('sergioges@gmail.com', '10para-Esplugues');
+loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD);
 
 async function sendData() {
   const { valid } = await form.value.validate();
