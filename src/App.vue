@@ -21,9 +21,6 @@ const display = useDisplay();
 moment.locale('es');
 
 const icons = [
-    'mdi-facebook',
-    'mdi-twitter',
-    'mdi-linkedin',
     'mdi-instagram',
   ]
 
@@ -92,7 +89,8 @@ async function registerUser(email, password) {
 async function loginUser(email, password) {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    console.log('Usuario autenticado:', userCredential.user);
+    const accessToken = userCredential.user.accessToken;
+    localStorage.setItem('accessToken', accessToken);
   } catch (error) {
     console.error('Error al iniciar sesión:', error.message);
   }
@@ -104,7 +102,6 @@ async function sendData() {
   const { valid } = await form.value.validate();
   if (valid) {
     try {
-      // Datos a guardar en Firestore
       const reservationData = {
         name: contactData.name,
         email: contactData.email,
@@ -113,11 +110,15 @@ async function sendData() {
         pets: pets.value,
         dates: formattedDate.value,
         totalNights: totalNights.value,
-        createdAt: new Date() // Fecha de creación
+        status: 'pending',
+        createdAt: new Date()
       };
 
-      // Guarda los datos en la colección "reservations"
-      await addDoc(collection(db, 'reservations'), reservationData);
+      // Agrega el documento a Firestore y obtiene la referencia
+      const docRef = await addDoc(collection(db, 'reservations'), reservationData);
+
+      // Actualiza el documento para incluir el ID
+      await updateDoc(docRef, { id: docRef.id });
 
       alert('Reserva guardada exitosamente en Firebase!');
       resetData();
@@ -133,16 +134,27 @@ async function resetData () {
   pets.value = 'No'
   hosts.value = 1
   date.value = null
-  }
+}
+
+function openLink(url) {
+  window.open(url, '_blank');
+}
 </script>
 
 <template>
   <v-container>
     <v-row align="start" justify="center" class="mt-5">
       <v-col class="d-flex flex-column ga-4" cols="12" md="8">
-        <a href="https://vite.dev" target="_blank">
-        <img src="/vite.svg" class="logo" alt="Vite logo" />
+        <a href="https://cuca-de-llum.web.app" target="_blank">
+          <v-img
+            src="/cuca-de-llum-logo.png"
+            class="logo"
+            alt="Cuca de Llum logo"
+            contain
+          ></v-img>
         </a>
+        <h1 class="text-h5 font-weight-bold">Reserva tu estancia</h1>
+        <p class="text-body-2">En el corazón de Amealco, Quéretaro, se encuentra Cuca de Llum, un lugar mágico donde la naturaleza y la tranquilidad se unen para ofrecerte una experiencia única.</p>
         <VueDatePicker 
           v-model="date" 
           class="date-picker w-100"
@@ -244,7 +256,7 @@ async function resetData () {
         </v-form>
       </v-col>
     </v-row>
-    <v-footer class="text-center d-flex flex-column ga-2 py-4" color="indigo-lighten-1">
+    <v-footer class="custom-footer text-center d-flex flex-column ga-2 py-4">
       <div class="d-flex ga-3">
         <v-btn
           v-for="icon in icons"
@@ -252,19 +264,20 @@ async function resetData () {
           :icon="icon"
           density="comfortable"
           variant="text"
+          @click="openLink('https://www.instagram.com/cucadellumcasadecampo/')"
         ></v-btn>
       </div>
 
       <v-divider class="my-2" thickness="2" width="50"></v-divider>
 
       <div class="text-caption font-weight-regular opacity-60">
-        Phasellus feugiat arcu sapien, et iaculis ipsum elementum sit amet. Mauris cursus commodo interdum. Praesent ut risus eget metus luctus accumsan id ultrices nunc. Sed at orci sed massa consectetur dignissim a sit amet dui. Duis commodo vitae velit et faucibus. Morbi vehicula lacinia malesuada. Nulla placerat augue vel ipsum ultrices, cursus iaculis dui sollicitudin. Vestibulum eu ipsum vel diam elementum tempor vel ut orci. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.
+        Aunque suene curioso, “Cuca de Llum” no es una expresión típica mexicana, ¡pero tiene una historia muy especial! En algunas zonas de habla catalana (Cataluña, España), “Cuca de llum” significa literalmente luciérnaga. Es una forma poética y tierna de referirse a ese pequeño insecto que brilla en la oscuridad. La palabra “llum” significa luz, y “cuca” puede referirse a un bichito.
       </div>
 
       <v-divider></v-divider>
 
       <div>
-        {{ new Date().getFullYear() }} — <strong>Vuetify</strong>
+        {{ new Date().getFullYear() }} — <strong>Cuca de Llum - Casa de Campo</strong>
       </div>
     </v-footer>
   </v-container>
@@ -272,20 +285,26 @@ async function resetData () {
 
 <style scoped>
 .logo {
-  height: 5em;
-  padding: 0.5em;
-  will-change: filter;
-  transition: filter 300ms;
+  width: 80%; 
+  height: auto;
+  border-radius: 5px; 
+  margin: 0 auto; 
+  margin-bottom: 20px; 
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+@media (min-width: 960px) { 
+  .logo {
+    width: 30%; 
+  }
 }
 
 .date-picker {
   justify-content: center;
   width: 100%;
+}
+
+.custom-footer {
+  background-color: #665745; 
+  color: white; 
 }
 </style>
