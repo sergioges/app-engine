@@ -31,11 +31,11 @@ admin.initializeApp();
 
 // Configura el transporte de nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: GMAIL_EMAIL,
-    pass: GMAIL_PASSWORD,
-  },
+    service: 'gmail',
+    auth: {
+        user: 'cucadellumcasarural@gmail.com',
+        pass: 'wdzb sxkn smkw klwe',
+    },
 });
 
 // Función para enviar correos cuando se crea un documento en Firestore
@@ -49,28 +49,61 @@ exports.sendEmailOnReservation = onDocumentCreated('reservations/{reservationId}
       return;
     }
   
-    const mailOptions = {
-      from: 'cucadellumcasarural@gmail.com',
-      to: reservation.email, // Correo del destinatario
-      subject: 'Confirmación de reserva',
-      text: `Hola ${reservation.name}, tu reserva ha sido confirmada.`,
-      html: `
-        <h1>Confirmación de reserva</h1>
-        <p>Hola ${reservation.name}, tu reserva ha sido confirmada.</p>
-        <p><strong>Detalles:</strong></p>
-        <ul>
-          <li><strong>Fechas:</strong> ${reservation.dates}</li>
-          <li><strong>Noches:</strong> ${reservation.totalNights}</li>
-          <li><strong>Huéspedes:</strong> ${reservation.hosts}</li>
-          <li><strong>Mascotas:</strong> ${reservation.pets}</li>
-        </ul>
-      `,
-    };
+    const mailOptionsArray = [
+        {
+          from: 'cucadellumcasarural@gmail.com',
+          to: reservation.email, // Correo del destinatario principal
+          subject: 'Confirmación de reserva',
+          text: `Hola ${reservation.name}, tu reserva ha sido confirmada.`,
+          html: `
+            <h1>Confirmación de reserva</h1>
+            <p>Hola ${reservation.name}, tu reserva ha sido confirmada.</p>
+            <p><strong>Detalles:</strong></p>
+            <ul>
+              <li><strong>Fechas:</strong> ${reservation.dates}</li>
+              <li><strong>Noches:</strong> ${reservation.totalNights}</li>
+              <li><strong>Huéspedes:</strong> ${reservation.hosts}</li>
+              <li><strong>Mascotas:</strong> ${reservation.pets}</li>
+            </ul>
+          `,
+        },
+        {
+          from: 'cucadellumcasarural@gmail.com',
+          to: 'cucadellumcasarural@gmail.com', // Correo del administrador o notificación interna
+          subject: 'Nueva reserva registrada',
+          text: `Se ha registrado una nueva reserva para ${reservation.name}.`,
+          html: `
+            <h1>Nueva reserva registrada</h1>
+            <p>Se ha registrado una nueva reserva con los siguientes detalles:</p>
+            <p><strong>Detalles:</strong></p>
+            <ul>
+              <li><strong>Nombre:</strong> ${reservation.name}</li>
+              <li><strong>Correo:</strong> ${reservation.email}</li>
+              <li><strong>Teléfono:</strong> ${reservation.phone}</li>
+              <li><strong>Fechas:</strong> ${reservation.dates}</li>
+              <li><strong>Noches:</strong> ${reservation.totalNights}</li>
+              <li><strong>Huéspedes:</strong> ${reservation.hosts}</li>
+              <li><strong>Mascotas:</strong> ${reservation.pets}</li>
+            </ul>
+          `,
+        },
+      ];
   
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log('Correo enviado exitosamente a:', reservation.email);
-    } catch (error) {
-      console.error('Error al enviar el correo:', error);
-    }
+      try {
+        for (const mailOptions of mailOptionsArray) {
+          await transporter.sendMail(mailOptions);
+          console.log(`Correo enviado exitosamente a: ${mailOptions.to}`);
+        }
+      } catch (error) {
+        console.error('Error al enviar los correos:', error);
+      }
   });
+
+  // For Deploying
+  // sudo firebase deploy --only functions
+
+  // For adding variables .env
+  // firebase functions:config:set gmail.email="cucadellumcasarural@gmail.com"
+
+  // For checking variables .env
+  //  // firebase functions:config:get
