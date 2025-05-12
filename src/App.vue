@@ -6,7 +6,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import { db } from './plugins/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc } from 'firebase/firestore';
 
 import moment from 'moment';
 import 'moment/dist/locale/es';
@@ -133,7 +133,7 @@ async function resetData () {
   await form.value.reset()
   pets.value = 'No'
   hosts.value = 1
-  date.value = null
+  date.value = []
 }
 
 function openLink(url) {
@@ -167,18 +167,19 @@ function openLink(url) {
           inline 
           auto-apply
         />
+        <v-text-field 
+          v-model="formattedDate"
+          label="Check-in --- Check-out" 
+          :rules="[v => !!v || 'Falta escoger fechas']"
+          required
+          readonly
+          prepend-icon="mdi-calendar" 
+          hide-details="auto"
+          variant="solo">
+        </v-text-field>
         <v-form ref="form" class="mb-4">
           <v-row>
             <v-col class="d-flex flex-column ga-4 mb-4" cols="12" md="12">
-              <v-text-field 
-                v-model="formattedDate" 
-                label="Check-in --- Check-out" 
-                :rules="[v => !!v || 'Falta escoger fechas']"
-                required
-                prepend-icon="mdi-calendar" 
-                hide-details="auto"
-                variant="solo">
-              </v-text-field>
               <p>Total de noches: {{ totalNights }}</p>
               <v-row>
                 <v-col cols="12" md="6">
