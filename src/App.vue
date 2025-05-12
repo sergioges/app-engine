@@ -64,7 +64,8 @@ const totalNights = computed(() => {
   return moment(end).diff(moment(start), 'days'); 
 });
 
-// For demo purposes disables the next 2 days from the current date
+// For demo purposes disables the next 2 days from the current date.
+// :disabled-dates="disabledDates"
 const disabledDates = computed(() => {
   const today = new Date();
 
@@ -120,7 +121,7 @@ async function sendData() {
       // Actualiza el documento para incluir el ID
       await updateDoc(docRef, { id: docRef.id });
 
-      alert('Reserva guardada exitosamente en Firebase!');
+      alert('Hemos recibido tu solicitud de reserva. Nos pondremos en contacto contigo pronto.');
       resetData();
     } catch (error) {
       console.error('Error al guardar la reserva:', error);
@@ -153,8 +154,8 @@ function openLink(url) {
             contain
           ></v-img>
         </a>
-        <h1 class="text-h5 font-weight-bold">Reserva tu estancia</h1>
-        <p class="text-body-2">En el corazón de Amealco, Quéretaro, se encuentra Cuca de Llum, un lugar mágico donde la naturaleza y la tranquilidad se unen para ofrecerte una experiencia única.</p>
+        <h1 class="text-h4">Reserva tu estancia</h1>
+        <h2 class="text-body-2">En el corazón de Amealco, Quéretaro, se encuentra Cuca de Llum, un lugar mágico donde la naturaleza y la tranquilidad se unen para ofrecerte una experiencia única.</h2>
         <VueDatePicker 
           v-model="date" 
           class="date-picker w-100"
@@ -162,7 +163,6 @@ function openLink(url) {
           multi-calendars 
           :enable-time-picker="false"
           :min-date="new Date()"
-          :disabled-dates="disabledDates"
           locale="es"
           inline 
           auto-apply
@@ -179,7 +179,7 @@ function openLink(url) {
         </v-text-field>
         <v-form ref="form" class="mb-4">
           <v-row>
-            <v-col class="d-flex flex-column ga-4 mb-4" cols="12" md="12">
+            <v-col class="d-flex flex-column ga-4 mb-2" cols="12" md="12">
               <p>Total de noches: {{ totalNights }}</p>
               <v-row>
                 <v-col cols="12" md="6">
@@ -237,23 +237,28 @@ function openLink(url) {
               </v-text-field>
             </v-col>
           </v-row>
-          <v-btn
-            class="mt-4"
-            color="success"
-            block
-            @click="sendData"
-          >
-            Solicitar reserva
-          </v-btn>
-
-          <v-btn
-            class="mt-4"
-            color="error"
-            block
-            @click="resetData"
-          >
-            Borrar
-          </v-btn>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-btn
+              
+                color="success"
+                block
+                @click="sendData"
+              >
+                Solicitar reserva
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-btn
+               
+                color="error"
+                block
+                @click="resetData"
+              >
+                Borrar
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-form>
       </v-col>
     </v-row>
@@ -285,6 +290,28 @@ function openLink(url) {
 </template>
 
 <style scoped>
+@font-face {
+  font-family: 'CelciusFlower';
+  src: url('/fonts/celcius_flower.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cocomat';
+  src: url('/fonts/cocomat.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+h1 {
+  font-family: 'CelciusFlower', sans-serif;
+}
+
+h2 {
+  font-family: 'Cocomat', sans-serif;
+}
+
 .logo {
   width: 80%; 
   height: auto;
