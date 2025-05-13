@@ -20,14 +20,27 @@ const display = useDisplay();
 
 moment.locale('es');
 
-const icons = [
-    'mdi-instagram',
-  ]
+const footerIcons = [
+  {
+    icon: 'mdi-whatsapp',
+    url: 'https://api.whatsapp.com/send?phone=524423620391&text=Hola!%20Estoy%20interesad@%20en%20recibir%20más%20información%20de%20Cuca%20de%20Llum.'
+  },
+  {
+    icon: 'mdi-mail',
+    url: 'mailto:cucadellumcasarural@gmail.com'
+  },
+  {
+    icon: 'mdi-instagram',
+    url: 'https://www.instagram.com/cucadellumcasadecampo/'
+  },
+]
 
 const date = ref([]);
 const hosts = ref(1);
 const pets = ref('No');
 const form = ref(null);
+const showSuccess = ref(false);
+const showError = ref(false);
 const contactData = reactive({
   name: '',
   email: '',
@@ -109,10 +122,13 @@ async function sendData() {
         phone: contactData.phone,
         hosts: hosts.value,
         pets: pets.value,
-        dates: formattedDate.value,
+        dates: {
+          start: date.value[0].toISOString(), 
+          end: date.value[1].toISOString(),  
+        },
         totalNights: totalNights.value,
         status: 'pending',
-        createdAt: new Date()
+        createdAt: new Date().toISOString()
       };
 
       // Agrega el documento a Firestore y obtiene la referencia
@@ -121,11 +137,17 @@ async function sendData() {
       // Actualiza el documento para incluir el ID
       await updateDoc(docRef, { id: docRef.id });
 
-      alert('Hemos recibido tu solicitud de reserva. Nos pondremos en contacto contigo pronto.');
+      showSuccess.value = true;
+      setTimeout(() => {
+        showSuccess.value = false;
+      }, 5000);
       resetData();
     } catch (error) {
+      showError.value = true;
+      setTimeout(() => {
+        showError.value = false;
+      }, 5000);
       console.error('Error al guardar la reserva:', error);
-      alert('Hubo un error al guardar la reserva. Inténtalo de nuevo.');
     }
   }
 }
@@ -144,6 +166,26 @@ function openLink(url) {
 
 <template>
   <v-container>
+    <v-alert
+      v-if="showSuccess"
+      class="toast-alert"
+      title="Hemos recibido tu solicitud de reserva"
+      type="success"
+      border="end"
+      closable
+    >
+    <p>Nos pondremos en contacto contigo pronto. Para cualquier duda, puedes escribirnos a <a href='mailto:cucadellumcasarural@gmail.com'>nuestro mail.</a></p>
+    </v-alert>
+    <v-alert
+      v-if="showError"
+      class="toast-alert"
+      title="Algo ha fallado"
+      type="error"
+      border="end"
+      closable
+    >
+    <p>Por favor inténtalo de nuevo más tarde. Para cualquier duda, puedes escribirnos a <a href='mailto:cucadellumcasarural@gmail.com'>nuestro mail.</a></p>
+    </v-alert>
     <v-row align="start" justify="center" class="mt-5">
       <v-col class="d-flex flex-column ga-4" cols="12" md="8">
         <a href="https://cuca-de-llum.web.app" target="_blank">
@@ -167,6 +209,7 @@ function openLink(url) {
           inline 
           auto-apply
         />
+        <p>Selecciona en el calendario, el rango de días que deseas reservar.</p>
         <v-text-field 
           v-model="formattedDate"
           label="Check-in --- Check-out" 
@@ -265,12 +308,12 @@ function openLink(url) {
     <v-footer class="custom-footer text-center d-flex flex-column ga-2 py-4">
       <div class="d-flex ga-3">
         <v-btn
-          v-for="icon in icons"
-          :key="icon"
-          :icon="icon"
+          v-for="item in footerIcons"
+          :key="item.icon"
+          :icon="item.icon"
           density="comfortable"
           variant="text"
-          @click="openLink('https://www.instagram.com/cucadellumcasadecampo/')"
+          @click="openLink(item.url)"
         ></v-btn>
       </div>
 
@@ -324,6 +367,34 @@ h2 {
   .logo {
     width: 30%; 
   }
+}
+
+.toast-alert {
+  position: fixed; 
+  top: 20px; 
+  right: 20px; 
+  z-index: 9999; 
+  max-width: 600px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 16px; 
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .toast-alert {
+    top: 20px; 
+    right: auto; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    width: 90%; 
+  }
+}
+
+.toast-alert a {
+  color: #ffffff; 
+  font-weight: bold;
+  text-decoration: none;;
 }
 
 .date-picker {
