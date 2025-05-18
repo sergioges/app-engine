@@ -1,5 +1,5 @@
 <template>
-  <v-container class="fill-height" fluid>
+  <div>
     <router-view></router-view>
-  </v-container>
+  </div>
 </template>

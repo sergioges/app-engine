@@ -24,8 +24,8 @@ async function login() {
 </script>
 
 <template>
-    <v-container>
-        <v-row align="start" justify="center" >
+    <v-container class="align-container">
+        <v-row align="start" justify="center">
             <v-col class="d-flex flex-column ga-4" cols="12" md="8">
                 <a href="https://cuca-de-llum.web.app" target="_blank">
                     <v-img
@@ -69,9 +69,12 @@ async function login() {
   </template>
 
 <style scoped>
-.v-container {
-    background-color: #f5f5f5;
-    border-radius: 5px;;
+.align-container {
+  display: flex; /* Activa el diseño flexible */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  height: 100vh; /* Ocupa toda la altura del viewport */
+  width: 100%; /* Asegura que ocupe todo el ancho */
 }
 
 .logo {
