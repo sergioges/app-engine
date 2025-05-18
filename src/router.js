@@ -32,20 +32,15 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  const authToken = sessionStorage.getItem('authToken'); // Obtén el token de sessionStorage
+  const authToken = sessionStorage.getItem('authToken');
 
   if (to.meta.requiresAuth) {
     if (!authToken) {
-      // Si no hay token, redirige al login
       console.warn('No se encontró authToken. Redirigiendo al login...');
       return next('/login');
     }
-
-    // Si hay token, permite el acceso
     return next();
   }
-
-  // Si la ruta no requiere autenticación, permite el acceso
   next();
 });
 

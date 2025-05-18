@@ -1,12 +1,12 @@
 <script setup>
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted } from 'vue';
 
 import { auth } from '../plugins/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import { db } from '../plugins/firebase';
-import { collection, addDoc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, getDocs } from 'firebase/firestore';
 
 import moment from 'moment';
 import 'moment/dist/locale/es';
@@ -35,7 +35,8 @@ const footerIcons = [
   },
 ]
 
-const date = ref([]);
+const reservations = reactive([])
+const reservationDates = ref([]);
 const hosts = ref(1);
 const pets = ref('No');
 const form = ref(null);
@@ -60,45 +61,43 @@ const isMobile = computed(() => display.smAndDown);
 const isDesktop = computed(() => display.mdAndUp); 
 
 const formattedDate = computed(() => {
-  if (!date.value || date.value.length === 0) return;
+  if (!reservationDates.value || reservationDates.value.length === 0) return;
   let dateFormat;
   if (isMobile.value.value) {
-    dateFormat = date.value.map(d => moment(d).format('DD/MM/YYYY')).join(' --- ');
+    dateFormat = reservationDates.value.map(d => moment(d).format('DD/MM/YYYY')).join(' --- ');
   } else {
-    dateFormat = date.value.map(d => moment(d).format('DD/MM/YYYY (dddd)')).join(' --- ');
+    dateFormat = reservationDates.value.map(d => moment(d).format('DD/MM/YYYY (dddd)')).join(' --- ');
   }
 
   return dateFormat
 });
 
 const totalNights = computed(() => {
-  if (!date.value || date.value.length < 2) return 0; 
-  const [start, end] = date.value;
+  if (!reservationDates.value || reservationDates.value.length < 2) return 0; 
+  const [start, end] = reservationDates.value;
   return moment(end).diff(moment(start), 'days'); 
 });
 
-// For demo purposes disables the next 2 days from the current date.
-// :disabled-dates="disabledDates"
 const disabledDates = computed(() => {
-  const today = new Date();
+  // Filtra las reservas con estado "pending" o "paid"
+  const filteredReservations = reservations.filter(
+    (reservation) => reservation.status === 'paid'
+  );
 
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  // Extrae y aplana todas las fechas (dates) de las reservas filtradas
+  const allDates = filteredReservations.flatMap((reservation) => reservation.dates);
 
-  const afterTomorrow = new Date(tomorrow);
-  afterTomorrow.setDate(tomorrow.getDate() + 1);
+  return [...new Set(allDates)]; // Elimina duplicados
+});
 
-  return [tomorrow, afterTomorrow]
-})
-
-async function registerUser(email, password) {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    console.log('Usuario registrado:', userCredential.user);
-  } catch (error) {
-    console.error('Error al registrar usuario:', error.message);
-  }
-}
+// async function registerUser(email, password) {
+//   try {
+//     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+//     console.log('Usuario registrado:', userCredential.user);
+//   } catch (error) {
+//     console.error('Error al registrar usuario:', error.message);
+//   }
+// }
 
 async function loginUser(email, password) {
   try {
@@ -112,6 +111,51 @@ async function loginUser(email, password) {
 
 loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD);
 
+async function fetchReservations() {
+  // Clean up the reservations array before fetching new data.
+  reservations.splice(0);
+  try {
+    const querySnapshot = await getDocs(collection(db, 'reservations'));
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      reservations.push({
+        id: doc.id,
+        createdAt: new Date(data.createdAt).toLocaleString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        dates: data.dates,
+        totalNights: data.totalNights,
+        hosts: data.hosts,
+        pets: data.pets,
+        status: data.status,
+      });
+    });
+  } catch (error) {
+    console.error('Error al obtener las reservas:', error);
+  }
+}
+
+function getDatesInRange(startDate, endDate) {
+  const dates = [];
+  let currentDate = moment(startDate).startOf('day'); 
+  const finalDate = moment(endDate).startOf('day'); 
+
+  while (currentDate.isSameOrBefore(finalDate)) {
+    // Establece la hora a las 00:00:00 y convierte a formato ISO
+    const normalizedDate = moment(currentDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+    dates.push(normalizedDate);
+    currentDate.add(1, 'day');
+  }
+
+  return dates;
+}
+
 async function sendData() {
   const { valid } = await form.value.validate();
   if (valid) {
@@ -122,13 +166,10 @@ async function sendData() {
         phone: contactData.phone,
         hosts: hosts.value,
         pets: pets.value,
-        dates: {
-          start: date.value[0].toISOString(), 
-          end: date.value[1].toISOString(),  
-        },
+        dates: getDatesInRange(reservationDates.value[0], reservationDates.value[1]),
         totalNights: totalNights.value,
         status: 'pending',
-        createdAt: new Date().toISOString()
+        createdAt: moment().toISOString()
       };
 
       // Agrega el documento a Firestore y obtiene la referencia
@@ -140,13 +181,13 @@ async function sendData() {
       showSuccess.value = true;
       setTimeout(() => {
         showSuccess.value = false;
-      }, 5000);
+      }, 6000);
       resetData();
     } catch (error) {
       showError.value = true;
       setTimeout(() => {
         showError.value = false;
-      }, 5000);
+      }, 6000);
       console.error('Error al guardar la reserva:', error);
     }
   }
@@ -156,12 +197,16 @@ async function resetData () {
   await form.value.reset()
   pets.value = 'No'
   hosts.value = 1
-  date.value = []
+  reservationDates.value = []
 }
 
 function openLink(url) {
   window.open(url, '_blank');
 }
+
+onMounted(() => {
+  fetchReservations();
+});
 </script>
 
 <template>
@@ -199,15 +244,17 @@ function openLink(url) {
         <h1 class="text-h4">Reserva tu estancia</h1>
         <h2 class="text-body-2">En el corazón de Amealco, Quéretaro, se encuentra Cuca de Llum, un lugar mágico donde la naturaleza y la tranquilidad se unen para ofrecerte una experiencia única.</h2>
         <VueDatePicker 
-          v-model="date" 
+          v-model="reservationDates" 
           class="date-picker w-100"
           range
           multi-calendars 
           :enable-time-picker="false"
           :min-date="new Date()"
+          :month-change-on-scroll="false"
           locale="es"
           inline 
           auto-apply
+          :disabled-dates="disabledDates"
         />
         <p>Selecciona en el calendario, el rango de días que deseas reservar.</p>
         <v-text-field 

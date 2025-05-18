@@ -7,25 +7,43 @@ const router = useRouter();
 
 const username = ref('');
 const password = ref('');
+const showError = ref(false);
 
 async function login() {
   const auth = getAuth();
   try {
     const userCredential = await signInWithEmailAndPassword(auth, username.value, password.value);
+    console.log(userCredential)
     const accessToken = await userCredential.user.getIdToken();
 
     sessionStorage.setItem('authToken', accessToken);
 
     router.push('/admin');
   } catch (error) {
+    if (error.code && error.code.startsWith('auth/')) {
+      showError.value = true;
+      setTimeout(() => {
+        showError.value = false;
+      }, 6000);
+    }
     console.error('Error al iniciar sesión:', error.message);
   }
 }
 </script>
 
 <template>
-    <v-container>
-        <v-row align="start" justify="center" >
+    <v-alert
+      v-if="showError"
+      class="toast-alert"
+      title="Algo ha fallado"
+      type="error"
+      border="end"
+      closable
+    >
+    <p>Por favor inténtalo de nuevo más tarde. Para cualquier duda, puedes escribirnos a <a href='mailto:cucadellumcasarural@gmail.com'>nuestro mail.</a></p>
+    </v-alert>
+    <v-container class="align-container">
+        <v-row align="start" justify="center">
             <v-col class="d-flex flex-column ga-4" cols="12" md="8">
                 <a href="https://cuca-de-llum.web.app" target="_blank">
                     <v-img
@@ -69,9 +87,12 @@ async function login() {
   </template>
 
 <style scoped>
-.v-container {
-    background-color: #f5f5f5;
-    border-radius: 5px;;
+.align-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
 }
 
 .logo {
@@ -86,5 +107,33 @@ async function login() {
   .logo {
     width: 30%; 
   }
+}
+
+.toast-alert {
+  position: fixed; 
+  top: 20px; 
+  right: 20px; 
+  z-index: 9999; 
+  max-width: 600px; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 16px; 
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .toast-alert {
+    top: 20px; 
+    right: auto; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    width: 90%; 
+  }
+}
+
+.toast-alert a {
+  color: #ffffff; 
+  font-weight: bold;
+  text-decoration: none;;
 }
 </style>
