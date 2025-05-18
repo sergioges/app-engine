@@ -146,11 +146,10 @@ function getDatesInRange(startDate, endDate) {
   let currentDate = moment(startDate).startOf('day'); 
   const finalDate = moment(endDate).startOf('day'); 
 
-  console.log('startDate', currentDate);
-  console.log('endDate', finalDate);
-
   while (currentDate.isSameOrBefore(finalDate)) {
-    dates.push(currentDate.utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'));
+    // Establece la hora a las 00:00:00 y convierte a formato ISO
+    const normalizedDate = moment(currentDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+    dates.push(normalizedDate);
     currentDate.add(1, 'day');
   }
 
@@ -170,7 +169,7 @@ async function sendData() {
         dates: getDatesInRange(reservationDates.value[0], reservationDates.value[1]),
         totalNights: totalNights.value,
         status: 'pending',
-        createdAt: new Date().toISOString()
+        createdAt: moment().toISOString()
       };
 
       // Agrega el documento a Firestore y obtiene la referencia
@@ -186,6 +185,9 @@ async function sendData() {
       resetData();
     } catch (error) {
       showError.value = true;
+      setTimeout(() => {
+        showError.value = false;
+      }, 6000);
       console.error('Error al guardar la reserva:', error);
     }
   }

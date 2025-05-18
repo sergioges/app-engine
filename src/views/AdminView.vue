@@ -13,8 +13,9 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
 const display = useDisplay();
-
 const router = useRouter();
+
+moment.locale('es');
 
 const reservationStatus = ['paid', 'pending', 'canceled'];
 const headers = [
@@ -136,9 +137,13 @@ const formattedDate = computed(() => {
     dateFormat = selectedReservation.value.dates.map(d => moment(d).format('DD/MM/YYYY (dddd)')).join(' --- ');
   }
 
-  console.log(selectedReservation.value.dates);
-
   return dateFormat
+});
+
+const totalNights = computed(() => {
+  if (!selectedReservation.value.dates || selectedReservation.value.dates.length < 2) return 0; 
+  const [start, end] = selectedReservation.value.dates;
+  return moment(end).diff(moment(start), 'days'); 
 });
 
 function setStatusColor(status) {
@@ -178,7 +183,6 @@ async function fetchReservations() {
         pets: data.pets,
         status: data.status,
       });
-      console.log('reservations', reservations);
     });
   } catch (error) {
     console.error('Error al obtener las reservas:', error);
@@ -226,9 +230,8 @@ function getDatesInRange(startDate, endDate) {
 
   while (currentDate.isSameOrBefore(finalDate)) {
     // Convierte la fecha a un objeto Date y establece la hora a las 00:00:00
-    const normalizedDate = new Date(currentDate.toDate());
-    normalizedDate.setHours(0, 0, 0, 0); // Asegura que la hora sea 00:00:00
-    dates.push(normalizedDate.toISOString()); // Agrega la fecha en formato ISO
+    const normalizedDate = moment(currentDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+    dates.push(normalizedDate); // Agrega la fecha en formato ISO
     currentDate.add(1, 'day'); // Avanza un día
   }
 
@@ -248,7 +251,7 @@ async function updateReservation() {
             phone: selectedReservation.value.phone,
             email: selectedReservation.value.email,
             dates: getDatesInRange(selectedReservation.value.dates[0], selectedReservation.value.dates[1]),
-            totalNights: selectedReservation.value.totalNights,
+            totalNights: totalNights.value,
             hosts: selectedReservation.value.hosts,
             pets: selectedReservation.value.pets,
             status: selectedReservation.value.status,
@@ -293,9 +296,10 @@ function closeSession() {
 }
 
 const getTotalNights = (dateVal) => {
-  if (!dateVal || dateVal.length < 2) return 0; 
+  const message = isMobile.value.value ? `Noches:` : `Total de noches:`;
+  if (!dateVal || dateVal.length < 2) return message; 
   const [start, end] = dateVal;
-  return `${isMobile.value.value ? `Noches` : `Total de noches:`} ${moment(end).diff(moment(start), 'days')}`; 
+  return `${message} ${moment(end).diff(moment(start), 'days')}`; 
 }
 
 onMounted(() => {
@@ -331,40 +335,38 @@ onMounted(() => {
         <v-card-title class="text-h5">Editar Reserva</v-card-title>
         <v-card-text>
           <v-form ref="form" v-model="valid">
-  
-            <!-- Creación (Solo lectura) -->
             <v-text-field
               v-model="selectedReservation.createdAt"
               label="Creación"
+              prepend-icon="mdi-account-wrench" 
               outlined
               readonly
             ></v-text-field>
   
-            <!-- Nombre -->
             <v-text-field
               v-model="selectedReservation.name"
               label="Nombre"
+              prepend-icon="mdi-rename" 
               outlined
               required
             ></v-text-field>
   
-            <!-- Teléfono -->
             <v-text-field
               v-model="selectedReservation.phone"
               label="Teléfono"
+              prepend-icon="mdi-phone-outgoing" 
               outlined
               required
             ></v-text-field>
   
-            <!-- Email -->
             <v-text-field
               v-model="selectedReservation.email"
               label="Email"
+              prepend-icon="mdi-email-arrow-right" 
               outlined
               required
             ></v-text-field>
   
-            <!-- Fechas de Reserva -->
             <v-row>
               <v-col cols="12" class="d-flex justify-center mb-4">
                 <VueDatePicker 
@@ -398,11 +400,6 @@ onMounted(() => {
                       - 
                       {{ moment(selectedReservation.dates[selectedReservation.dates.length - 1]).format('DD/MM') }}
                     </p>
-                    <ul>
-                      <li v-for="date in disabledDates" :key="date">
-                        {{ new Date(date).toLocaleString('es-ES', { day: '2-digit', month: '2-digit' }) }}
-                      </li>
-                    </ul>
                   </template>
                   <template #action-preview="{ value }">
                     <h3>{{ getTotalNights(value) }}</h3>
@@ -411,10 +408,10 @@ onMounted(() => {
               </v-col>
             </v-row>
   
-            <!-- Huéspedes -->
             <v-text-field
               v-model="selectedReservation.hosts"
               label="Huéspedes"
+              prepend-icon="mdi-account-multiple" 
               outlined
               required
               type="number"
@@ -424,6 +421,7 @@ onMounted(() => {
             <v-text-field
               v-model="selectedReservation.pets"
               label="Mascotas"
+              prepend-icon="mdi-paw" 
               outlined
               required
               type="string"
@@ -434,6 +432,7 @@ onMounted(() => {
               v-model="selectedReservation.status"
               :items="reservationStatus"
               label="Estado"
+              prepend-icon="mdi-list-status" 
               outlined
               required
             ></v-select>
