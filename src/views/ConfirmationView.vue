@@ -31,6 +31,8 @@ const footerIcons = [
 const shuffledNumbers = ref([])
 
 onMounted(() => {
+  loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD)
+
   if (idReservation && queryCode === 'done') {
     router.push('')
   } else {
@@ -59,8 +61,6 @@ async function loginUser(email, password) {
     console.error('Error al iniciar sesión:', error.message);
   }
 }
-
-loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD);
 
 async function updateReservationStatus(id) {
   if (!id) return
