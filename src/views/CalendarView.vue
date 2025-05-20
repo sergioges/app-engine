@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted, watch } from 'vue';
 
 import { auth } from '../plugins/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -47,6 +47,8 @@ const contactData = reactive({
   email: '',
   phone: ''
 });
+const isPaymentAvailable = ref(false)
+const countdown = ref(0)
 
 const emailValidation = ref ([
   v => !!v || 'Falta tu email',
@@ -90,9 +92,11 @@ const disabledDates = computed(() => {
   return [...new Set(allDates)]; // Elimina duplicados
 });
 
-const showPaidBtn = computed(() => {
-  if (contactData.name && contactData.email && contactData.phone) return true
-})
+const formattedCountdown = computed(() => {
+  const minutes = Math.floor(countdown.value / 60);
+  const seconds = countdown.value % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
 
 // async function registerUser(email, password) {
 //   try {
@@ -176,17 +180,17 @@ async function sendData() {
         createdAt: moment().toISOString()
       };
 
-      // Agrega el documento a Firestore y obtiene la referencia
       const docRef = await addDoc(collection(db, 'reservations'), reservationData);
 
-      // Actualiza el documento para incluir el ID
+      sessionStorage.setItem('idReservation', docRef.id)
+
       await updateDoc(docRef, { id: docRef.id });
 
+      isPaymentAvailable.value = true
       showSuccess.value = true;
       setTimeout(() => {
         showSuccess.value = false;
       }, 6000);
-      resetData();
     } catch (error) {
       showError.value = true;
       setTimeout(() => {
@@ -202,6 +206,7 @@ async function resetData () {
   pets.value = 'No'
   hosts.value = 1
   reservationDates.value = []
+  isPaymentAvailable.value = false
 }
 
 function openLink(url) {
@@ -215,6 +220,21 @@ onMounted(() => {
   script.async = true;
   document.head.appendChild(script);
 });
+
+watch(isPaymentAvailable, (newVal) => {
+  if (newVal) {
+    countdown.value = 180
+    const timer = setInterval(() => {
+    if (countdown.value > 0) {
+      countdown.value--;
+    } else {
+      clearInterval(timer);
+      isPaymentAvailable.value = false
+      resetData()
+    }
+  }, 1000);
+  }
+})
 </script>
 
 <template>
@@ -227,7 +247,7 @@ onMounted(() => {
       border="end"
       closable
     >
-    <p>Nos pondremos en contacto contigo pronto. Para cualquier duda, puedes escribirnos a <a href='mailto:cucadellumcasarural@gmail.com'>nuestro mail.</a></p>
+    <p>Ahora continua con el proceso de pago. Recuerda que tienes {{ formattedCountdown }} minutos para realizarlo.</p>
     </v-alert>
     <v-alert
       v-if="showError"
@@ -335,9 +355,32 @@ onMounted(() => {
               </v-text-field>
             </v-col>
           </v-row>
-          <v-row class="d-flex justify-center">
-            <v-col v-if="showPaidBtn" cols="12">
-              <div v-show="totalNights === 1" class="stripe-btn">
+          <v-row v-if="!isPaymentAvailable" class="d-flex justify-center">
+            <v-col cols="12" md="6">
+              <v-btn
+                color="success"
+                block
+                @click="sendData"
+              >
+                Solicitar reserva
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-btn
+               
+                color="error"
+                block
+                @click="resetData"
+              >
+                Borrar
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-row v-else class="d-flex justify-center">
+            <v-col cols="12" md="6">
+              <p>Tienes {{ formattedCountdown }} minutos para realizar el pago.</p>
+              <br />
+              <div v-show="totalNights <= 1" class="stripe-btn">
                 <stripe-buy-button
                   buy-button-id="buy_btn_1RQDGNCIQLEDgwFHxF3CRbov"
                   publishable-key="pk_test_51RQD8NCIQLEDgwFH3qTpatBehR1DtMI3xjGyAuEwq4MvVnD7NR1c5cqjeK2mNeuheeim3aFybhtto4JWMBDBAKeR00u8NepdDY"
@@ -352,17 +395,7 @@ onMounted(() => {
                 </stripe-buy-button>
               </div>
               <v-btn
-                v-if="totalNights >= 3"
-                color="success"
-                block
-                @click="sendData"
-              >
-                Solicitar reserva
-              </v-btn>
-            </v-col>
-            <v-col cols="6" md="3">
-              <v-btn
-               
+                class="resetBtn"
                 color="error"
                 block
                 @click="resetData"

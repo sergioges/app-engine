@@ -2,27 +2,14 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { db } from '../plugins/firebase';
+import { updateDoc, doc } from 'firebase/firestore';
+
 const route = useRoute()
 const router = useRouter();
 
 const queryCode = route.query.paid
-
-console.log(queryCode)
-
-const shuffledNumbers = ref([])
-
-onMounted(() => {
-  if (queryCode !== 'done') router.push('/calendar')
-  shuffledNumbers.value = shuffleArray([...Array(9).keys()].map(i => i + 1))
-})
-
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
-  }
-  return array
-}
+const idReservation = sessionStorage.getItem('idReservation')
 
 const footerIcons = [
   {
@@ -38,6 +25,38 @@ const footerIcons = [
     url: 'https://www.instagram.com/cucadellumcasadecampo/'
   },
 ]
+
+const shuffledNumbers = ref([])
+
+onMounted(() => {
+  if (idReservation && queryCode === 'done') {
+    router.push('')
+  } else {
+    router.push('/calendar')
+  }
+
+  shuffledNumbers.value = shuffleArray([...Array(9).keys()].map(i => i + 1))
+
+  updateReservationStatus(idReservation)
+})
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
+
+async function updateReservationStatus(id) {
+  if (!id) return
+  try {
+    const reservationRef = doc(db, 'reservations', id);
+    await updateDoc(reservationRef, { status: 'paid' });
+  } catch (error) {
+    console.error('Error al actualizar la reserva:', error);
+  }
+}
 </script>
 
 <template>
