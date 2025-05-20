@@ -90,6 +90,10 @@ const disabledDates = computed(() => {
   return [...new Set(allDates)]; // Elimina duplicados
 });
 
+const showPaidBtn = computed(() => {
+  if (contactData.name && contactData.email && contactData.phone) return true
+})
+
 // async function registerUser(email, password) {
 //   try {
 //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -206,6 +210,10 @@ function openLink(url) {
 
 onMounted(() => {
   fetchReservations();
+  const script = document.createElement('script');
+  script.src = "https://js.stripe.com/v3/buy-button.js";
+  script.async = true;
+  document.head.appendChild(script);
 });
 </script>
 
@@ -327,10 +335,24 @@ onMounted(() => {
               </v-text-field>
             </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="12" md="6">
+          <v-row class="d-flex justify-center">
+            <v-col v-if="showPaidBtn" cols="12">
+              <div v-show="totalNights === 1" class="stripe-btn">
+                <stripe-buy-button
+                  buy-button-id="buy_btn_1RQDGNCIQLEDgwFHxF3CRbov"
+                  publishable-key="pk_test_51RQD8NCIQLEDgwFH3qTpatBehR1DtMI3xjGyAuEwq4MvVnD7NR1c5cqjeK2mNeuheeim3aFybhtto4JWMBDBAKeR00u8NepdDY"
+                >
+                </stripe-buy-button>
+              </div>
+              <div v-show="totalNights === 2" class="stripe-btn">
+                <stripe-buy-button
+                  buy-button-id="buy_btn_1RQZclCIQLEDgwFHMMGB6KZD"
+                  publishable-key="pk_test_51RQD8NCIQLEDgwFH3qTpatBehR1DtMI3xjGyAuEwq4MvVnD7NR1c5cqjeK2mNeuheeim3aFybhtto4JWMBDBAKeR00u8NepdDY"
+                >
+                </stripe-buy-button>
+              </div>
               <v-btn
-              
+                v-if="totalNights >= 3"
                 color="success"
                 block
                 @click="sendData"
@@ -338,7 +360,7 @@ onMounted(() => {
                 Solicitar reserva
               </v-btn>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="6" md="3">
               <v-btn
                
                 color="error"
@@ -447,6 +469,10 @@ h2 {
 .date-picker {
   justify-content: center;
   width: 100%;
+}
+
+.stripe-btn {
+  margin: -20px 0;
 }
 
 .custom-footer {

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from './views/LoginView.vue';
 import CalendarView from './views/CalendarView.vue';
 import AdminView from './views/AdminView.vue';
+import ConfirmationView from './views/ConfirmationView.vue';
 
 const routes = [
     {
@@ -23,6 +24,11 @@ const routes = [
     name: 'Admin',
     component: AdminView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/confirmation',
+    name: 'Confirmation',
+    component: ConfirmationView,
   },
 ];
 
