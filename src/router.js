@@ -30,6 +30,10 @@ const routes = [
     name: 'Confirmation',
     component: ConfirmationView,
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/calendar',
+  },
 ];
 
 const router = createRouter({
