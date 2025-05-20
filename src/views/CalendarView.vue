@@ -190,6 +190,7 @@ async function sendData() {
       showSuccess.value = true;
       setTimeout(() => {
         showSuccess.value = false;
+        if (totalNights.value >= 3) resetData()
       }, 6000);
     } catch (error) {
       showError.value = true;
@@ -247,7 +248,8 @@ watch(isPaymentAvailable, (newVal) => {
       border="end"
       closable
     >
-    <p>Ahora continua con el proceso de pago. Recuerda que tienes {{ formattedCountdown }} minutos para realizarlo.</p>
+    <p v-if="totalNights >= 3">Tan pronto revisemos tu solucitud nos pondremos en conacto contigo. Si lo deseas, puedes escribirnos a <a href='mailto:cucadellumcasarural@gmail.com'>nuestro mail.</a></p>
+    <p v-else>Ahora continua con el proceso de pago. Recuerda que tienes {{ formattedCountdown }} minutos para realizarlo.</p>
     </v-alert>
     <v-alert
       v-if="showError"
@@ -355,7 +357,7 @@ watch(isPaymentAvailable, (newVal) => {
               </v-text-field>
             </v-col>
           </v-row>
-          <v-row v-if="!isPaymentAvailable" class="d-flex justify-center">
+          <v-row v-if="!isPaymentAvailable || totalNights >= 3" class="d-flex justify-center">
             <v-col cols="12" md="6">
               <v-btn
                 color="success"
@@ -376,7 +378,7 @@ watch(isPaymentAvailable, (newVal) => {
               </v-btn>
             </v-col>
           </v-row>
-          <v-row v-else class="d-flex justify-center">
+          <v-row v-if="isPaymentAvailable && totalNights <= 2" class="d-flex justify-center">
             <v-col cols="12" md="6">
               <p>Tienes {{ formattedCountdown }} minutos para realizar el pago.</p>
               <br />
