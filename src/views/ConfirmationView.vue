@@ -3,7 +3,9 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { db } from '../plugins/firebase';
+import { auth } from '../plugins/firebase';
 import { updateDoc, doc } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const route = useRoute()
 const router = useRouter();
@@ -47,6 +49,18 @@ function shuffleArray(array) {
   }
   return array
 }
+
+async function loginUser(email, password) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const accessToken = userCredential.user.accessToken;
+    localStorage.setItem('accessToken', accessToken);
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error.message);
+  }
+}
+
+loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD);
 
 async function updateReservationStatus(id) {
   if (!id) return
