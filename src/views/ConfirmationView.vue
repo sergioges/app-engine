@@ -30,18 +30,20 @@ const footerIcons = [
 
 const shuffledNumbers = ref([])
 
-onMounted(() => {
-  loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD)
-
+onMounted(async () => {
   if (idReservation && queryCode === 'done') {
     router.push('')
   } else {
     router.push('/calendar')
   }
-
   shuffledNumbers.value = shuffleArray([...Array(9).keys()].map(i => i + 1))
 
-  updateReservationStatus(idReservation)
+  try {
+    await loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD)
+    await updateReservationStatus(idReservation)
+  } catch (error) {
+    console.error('Error durante el proceso de login o actualización:', error)
+  }
 })
 
 function shuffleArray(array) {
