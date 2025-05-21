@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, reactive, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { auth } from '../plugins/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -17,6 +18,8 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import { useDisplay } from 'vuetify';
 
 const display = useDisplay();
+const route = useRoute();
+const queryTestCode = route.query['test-mode'];
 
 moment.locale('es');
 
@@ -49,6 +52,7 @@ const contactData = reactive({
 });
 const isPaymentAvailable = ref(false)
 const countdown = ref(0)
+const isTestPaymentAvailable = ref(false)
 
 const emailValidation = ref ([
   v => !!v || 'Falta tu email',
@@ -190,7 +194,7 @@ async function sendData() {
       showSuccess.value = true;
       setTimeout(() => {
         showSuccess.value = false;
-        if (totalNights.value >= 3) resetData()
+        if (totalNights.value >= 6 && !isTestPaymentAvailable.value) resetData()
       }, 6000);
     } catch (error) {
       showError.value = true;
@@ -220,6 +224,7 @@ onMounted(() => {
   script.src = "https://js.stripe.com/v3/buy-button.js";
   script.async = true;
   document.head.appendChild(script);
+  if (queryTestCode === 'enable') isTestPaymentAvailable.value = true
 });
 
 watch(isPaymentAvailable, (newVal) => {
@@ -357,11 +362,12 @@ watch(isPaymentAvailable, (newVal) => {
               </v-text-field>
             </v-col>
           </v-row>
-          <v-row v-if="!isPaymentAvailable || totalNights >= 3" class="d-flex justify-center">
+          <v-row v-if="!isPaymentAvailable || totalNights >= 6" class="d-flex justify-center">
             <v-col cols="12" md="6">
               <v-btn
                 color="success"
                 block
+                :disabled="totalNights === 0"
                 @click="sendData"
               >
                 Solicitar reserva
@@ -378,21 +384,42 @@ watch(isPaymentAvailable, (newVal) => {
               </v-btn>
             </v-col>
           </v-row>
-          <v-row v-if="isPaymentAvailable && totalNights <= 2" class="d-flex justify-center">
+          <v-row v-if="!isTestPaymentAvailable && isPaymentAvailable && totalNights <= 5" class="d-flex justify-center">
             <v-col cols="12" md="6">
               <p>Tienes {{ formattedCountdown }} minutos para realizar el pago.</p>
               <br />
-              <div v-show="totalNights <= 1" class="stripe-btn">
+              <div v-show="totalNights === 1" class="stripe-btn">
                 <stripe-buy-button
-                  buy-button-id="buy_btn_1RQDGNCIQLEDgwFHxF3CRbov"
-                  publishable-key="pk_test_51RQD8NCIQLEDgwFH3qTpatBehR1DtMI3xjGyAuEwq4MvVnD7NR1c5cqjeK2mNeuheeim3aFybhtto4JWMBDBAKeR00u8NepdDY"
+                  buy-button-id="buy_btn_1RREO3FmAngK1tZ7JMxfHISk"
+                  publishable-key="pk_live_51RQD8CFmAngK1tZ7z0ErZpkdlXcmDv3eya6zGyD0ArqWY56AshHwlO1npQvKpfVsCId93vsxKQ6SfReYrvrUy9m300zptFLD1e"
                 >
                 </stripe-buy-button>
               </div>
               <div v-show="totalNights === 2" class="stripe-btn">
                 <stripe-buy-button
-                  buy-button-id="buy_btn_1RQZclCIQLEDgwFHMMGB6KZD"
-                  publishable-key="pk_test_51RQD8NCIQLEDgwFH3qTpatBehR1DtMI3xjGyAuEwq4MvVnD7NR1c5cqjeK2mNeuheeim3aFybhtto4JWMBDBAKeR00u8NepdDY"
+                  buy-button-id="buy_btn_1RREO3FmAngK1tZ7dwH6OvZs"
+                  publishable-key="pk_live_51RQD8CFmAngK1tZ7z0ErZpkdlXcmDv3eya6zGyD0ArqWY56AshHwlO1npQvKpfVsCId93vsxKQ6SfReYrvrUy9m300zptFLD1e"
+                >
+                </stripe-buy-button>
+              </div>
+              <div v-show="totalNights === 3" class="stripe-btn">
+                <stripe-buy-button
+                  buy-button-id="buy_btn_1RRG0QFmAngK1tZ7xPTujhD1"
+                  publishable-key="pk_live_51RQD8CFmAngK1tZ7z0ErZpkdlXcmDv3eya6zGyD0ArqWY56AshHwlO1npQvKpfVsCId93vsxKQ6SfReYrvrUy9m300zptFLD1e"
+                >
+                </stripe-buy-button>
+              </div>
+              <div v-show="totalNights === 4" class="stripe-btn">
+                <stripe-buy-button
+                  buy-button-id="buy_btn_1RRG1JFmAngK1tZ7UHSeikZy"
+                  publishable-key="pk_live_51RQD8CFmAngK1tZ7z0ErZpkdlXcmDv3eya6zGyD0ArqWY56AshHwlO1npQvKpfVsCId93vsxKQ6SfReYrvrUy9m300zptFLD1e"
+                >
+                </stripe-buy-button>
+              </div>
+              <div v-show="totalNights === 5" class="stripe-btn">
+                <stripe-buy-button
+                  buy-button-id="buy_btn_1RRG1tFmAngK1tZ7rqLb1Rwk"
+                  publishable-key="pk_live_51RQD8CFmAngK1tZ7z0ErZpkdlXcmDv3eya6zGyD0ArqWY56AshHwlO1npQvKpfVsCId93vsxKQ6SfReYrvrUy9m300zptFLD1e"
                 >
                 </stripe-buy-button>
               </div>
@@ -404,6 +431,17 @@ watch(isPaymentAvailable, (newVal) => {
               >
                 Borrar
               </v-btn>
+            </v-col>
+          </v-row>
+          <v-row v-if="isTestPaymentAvailable && isPaymentAvailable" class="d-flex justify-center">
+            <v-col cols="12" md="6">
+              <div class="stripe-btn">
+                <stripe-buy-button
+                  buy-button-id="buy_btn_1RRGjSCIQLEDgwFHe9cACXmB"
+                  publishable-key="pk_test_51RQD8NCIQLEDgwFH3qTpatBehR1DtMI3xjGyAuEwq4MvVnD7NR1c5cqjeK2mNeuheeim3aFybhtto4JWMBDBAKeR00u8NepdDY"
+                >
+                </stripe-buy-button>
+              </div>
             </v-col>
           </v-row>
         </v-form>
