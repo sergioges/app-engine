@@ -60,7 +60,7 @@ const emailValidation = ref ([
 ]);
 const phoneValidation = ref ([
   v => !!v || 'Falta tu teléfono',
-  v => /^\+?[1-9]\d{1,14}$/.test(v) || 'Teléfono inválido'
+  v => /^\+?[1-9]\d{1,14}$/.test(v) || 'Teléfono inválido (debe ser un número mexicano válido)'
 ]);
 
 const isMobile = computed(() => display.smAndDown);
@@ -358,7 +358,9 @@ watch(isPaymentAvailable, (newVal) => {
                 label="Teléfono" 
                 prepend-icon="mdi-phone" 
                 hide-details="auto"
-                variant="solo">
+                variant="solo"
+                type="tel"
+                >
               </v-text-field>
             </v-col>
           </v-row>
