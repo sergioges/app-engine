@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { db } from '../plugins/firebase';
@@ -10,8 +10,9 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 const route = useRoute()
 const router = useRouter();
 
-const queryCode = route.query.paid
 const idReservation = sessionStorage.getItem('idReservation')
+// For testing porpuses.
+const dbName = ('testing' in route.query && route.query.testing === 'enable') ? 'test-cuca' : 'reservations'
 
 const footerIcons = [
   {
@@ -30,8 +31,34 @@ const footerIcons = [
 
 const shuffledNumbers = ref([])
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+      ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
+
+async function loginUser(email, password) {
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error.message);
+  }
+}
+
+async function updateReservationStatus(id) {
+  if (!id) return
+  try {
+    const docRef = doc(db, dbName, id);
+    await updateDoc(docRef, { status: 'paid' });
+  } catch (error) {
+    console.error('Error al actualizar la reserva:', error);
+  }
+}
+
 onMounted(async () => {
-  if (idReservation && queryCode === 'done') {
+  if ('paid' in route.query && route.query.paid === 'done') {
     router.push('')
   } else {
     router.push('/calendar')
@@ -46,33 +73,9 @@ onMounted(async () => {
   }
 })
 
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-      ;[array[i], array[j]] = [array[j], array[i]]
-  }
-  return array
-}
-
-async function loginUser(email, password) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const accessToken = userCredential.user.accessToken;
-    localStorage.setItem('accessToken', accessToken);
-  } catch (error) {
-    console.error('Error al iniciar sesión:', error.message);
-  }
-}
-
-async function updateReservationStatus(id) {
-  if (!id) return
-  try {
-    const reservationRef = doc(db, 'reservations', id);
-    await updateDoc(reservationRef, { status: 'paid' });
-  } catch (error) {
-    console.error('Error al actualizar la reserva:', error);
-  }
-}
+onUnmounted(() => {
+  sessionStorage.removeItem('idReservation');
+});
 </script>
 
 <template>
