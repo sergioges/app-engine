@@ -266,7 +266,6 @@ async function updateReservation() {
     }, 5000);
     await fetchReservations();
     cancelEditReservation();
-    // reservations = [];
 
   } catch (error) {
     showError.value = true;
@@ -299,7 +298,7 @@ function closeSession() {
   router.push('/calendar');
 }
 
-const getTotalNights = (dateVal) => {
+function getTotalNights(dateVal) {
   const message = isMobile.value.value ? `Noches:` : `Total de noches:`;
   if (!dateVal || dateVal.length < 2) return message;
   const [start, end] = dateVal;
@@ -322,7 +321,7 @@ onMounted(() => {
     <p>Por favor inténtalo de nuevo más tarde. Para cualquier duda, puedes escribirnos a <a
         href='mailto:cucadellumcasarural@gmail.com'>nuestro mail.</a></p>
   </v-alert>
-  <v-container v-if="showEditForm" class="container">
+  <v-container v-if="showEditForm">
     <v-card class="pa-4">
       <v-card-title class="text-h5">Editar Reserva</v-card-title>
       <v-card-text>
@@ -382,7 +381,7 @@ onMounted(() => {
       </v-card-actions>
     </v-card>
   </v-container>
-  <v-container>
+  <v-container class="data-table">
     <v-row>
       <v-col>
         <v-data-table-virtual :headers="headers" :items="reservations" fixed-header height="400" class="elevation-1">
@@ -420,7 +419,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.v-container {
+.data-table {
   max-width: max-content;
 }
 
