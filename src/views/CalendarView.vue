@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, reactive, onMounted, watch } from 'vue';
+import { ref, computed, reactive, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { auth } from '../plugins/firebase';
@@ -48,7 +48,8 @@ const showError = ref(false);
 const contactData = reactive({
   name: '',
   email: '',
-  phone: ''
+  phone: '',
+  marketingEnabled: true,
 });
 const isPaymentAvailable = ref(false)
 const countdown = ref(0)
@@ -60,8 +61,10 @@ const emailValidation = ref([
 ]);
 const phoneValidation = ref([
   v => !!v || 'Falta tu teléfono',
-  v => /^\+?[1-9]\d{1,14}$/.test(v) || 'Teléfono inválido (debe ser un número mexicano válido)'
+  v => /^\d{10}$/.test(v) || 'Teléfono inválido (debe ser un número mexicano válido)'
 ]);
+
+const dbName = queryTestCode === 'enable' ? 'test-cuca' : 'reservations' 
 
 const isMobile = computed(() => display.smAndDown);
 const isDesktop = computed(() => display.mdAndUp);
@@ -113,9 +116,7 @@ const formattedCountdown = computed(() => {
 
 async function loginUser(email, password) {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const accessToken = userCredential.user.accessToken;
-    localStorage.setItem('accessToken', accessToken);
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
     console.error('Error al iniciar sesión:', error.message);
   }
@@ -127,7 +128,7 @@ async function fetchReservations() {
   // Clean up the reservations array before fetching new data.
   reservations.splice(0);
   try {
-    const querySnapshot = await getDocs(collection(db, 'reservations'));
+    const querySnapshot = await getDocs(collection(db, dbName));
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       reservations.push({
@@ -170,12 +171,14 @@ function getDatesInRange(startDate, endDate) {
 
 async function sendData() {
   const { valid } = await form.value.validate();
+
   if (valid) {
     try {
       const reservationData = {
         name: contactData.name,
         email: contactData.email,
-        phone: contactData.phone,
+        phone: `+52${contactData.phone}`,
+        marketingEnabled: contactData.marketingEnabled,
         hosts: hosts.value,
         pets: pets.value,
         dates: getDatesInRange(reservationDates.value[0], reservationDates.value[1]),
@@ -184,7 +187,7 @@ async function sendData() {
         createdAt: moment().toISOString()
       };
 
-      const docRef = await addDoc(collection(db, 'reservations'), reservationData);
+      const docRef = await addDoc(collection(db, dbName), reservationData);
 
       sessionStorage.setItem('idReservation', docRef.id)
 
@@ -218,6 +221,10 @@ function openLink(url) {
   window.open(url, '_blank');
 }
 
+function sendWhatsapp() {
+  window.open('https://api.whatsapp.com/send?phone=524423620391&text=Hola!%20Acabo%20de%20realizar%20una%20reserva%20para%20Cuca%20de%20Llum...', '_blank')
+}
+
 onMounted(() => {
   fetchReservations();
   const script = document.createElement('script');
@@ -240,6 +247,10 @@ watch(isPaymentAvailable, (newVal) => {
       }
     }, 1000);
   }
+})
+
+onUnmounted(() => {
+  sessionStorage.removeItem('idReservation')
 })
 </script>
 
@@ -298,6 +309,7 @@ watch(isPaymentAvailable, (newVal) => {
               <v-text-field v-model="contactData.phone" required :rules="phoneValidation" label="Teléfono"
                 prepend-icon="mdi-phone" hide-details="auto" variant="solo" type="tel">
               </v-text-field>
+              <v-checkbox v-model="contactData.marketingEnabled" color="success" label="¿Te gustaría recibir información de Amealco y conocer nuestras promociones?" hide-details="auto" variant="solo"></v-checkbox>
             </v-col>
           </v-row>
           <v-row v-if="!isPaymentAvailable || totalNights >= 6" class="d-flex justify-center">
@@ -346,13 +358,23 @@ watch(isPaymentAvailable, (newVal) => {
               </v-btn>
             </v-col>
           </v-row>
-          <v-row v-if="isTestPaymentAvailable && isPaymentAvailable" class="d-flex justify-center">
+          <v-row v-if="isTestPaymentAvailable && isPaymentAvailable" align="center" justify="center">
             <v-col cols="12" md="6">
               <div class="stripe-btn">
                 <stripe-buy-button buy-button-id="buy_btn_1RRGjSCIQLEDgwFHe9cACXmB"
                   publishable-key="pk_test_51RQD8NCIQLEDgwFH3qTpatBehR1DtMI3xjGyAuEwq4MvVnD7NR1c5cqjeK2mNeuheeim3aFybhtto4JWMBDBAKeR00u8NepdDY">
                 </stripe-buy-button>
               </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <p>Si prefieres realizar el pago mediante transferencia bancaria. Envía un mensaje vía Whatsapp.</p>
+              <v-btn 
+                density="default" 
+                color="primary" 
+                prepend-icon="mdi-whatsapp" 
+                class="text-none mt-6 contact-btn"
+                @click="sendWhatsapp"
+              >Contacta</v-btn>
             </v-col>
           </v-row>
         </v-form>
@@ -455,6 +477,12 @@ h2 {
 
 .stripe-btn {
   margin: -20px 0;
+}
+
+.contact-btn {
+  display: flex;
+  padding: 20px 40px;
+  margin: 0 auto;
 }
 
 .custom-footer {

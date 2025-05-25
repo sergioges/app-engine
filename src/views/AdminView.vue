@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useDisplay } from 'vuetify';
 
 import { db } from '../plugins/firebase';
@@ -14,6 +14,8 @@ import '@vuepic/vue-datepicker/dist/main.css'
 
 const display = useDisplay();
 const router = useRouter();
+const route = useRoute();
+const queryTestCode = route.query['test-mode'];
 
 moment.locale('es');
 
@@ -103,6 +105,8 @@ const showError = ref(false);
 const isMobile = computed(() => display.smAndDown);
 const isDesktop = computed(() => display.mdAndUp);
 
+const dbName = queryTestCode === 'enable' ? 'test-cuca' : 'reservations' 
+
 const disabledDates = computed(() => {
   // Filtra las reservas con estado "pending" o "paid"
   const filteredReservations = reservations.filter(
@@ -163,7 +167,7 @@ async function fetchReservations() {
   // Clean up the reservations array before fetching new data.
   reservations.splice(0);
   try {
-    const querySnapshot = await getDocs(collection(db, 'reservations'));
+    const querySnapshot = await getDocs(collection(db, dbName));
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       reservations.push({
@@ -192,7 +196,7 @@ async function fetchReservations() {
 async function fetchSelectedReservation(id) {
   showEditForm.value = true;
   try {
-    const reservationRef = doc(db, 'reservations', id);
+    const reservationRef = doc(db, dbName, id);
     const reservationSnapshot = await getDoc(reservationRef);
     if (reservationSnapshot.exists()) {
       const data = reservationSnapshot.data();
@@ -245,7 +249,7 @@ async function updateReservation() {
   }
 
   try {
-    const reservationRef = doc(db, 'reservations', selectedReservation.value.id);
+    const reservationRef = doc(db, dbName, selectedReservation.value.id);
     await updateDoc(reservationRef, {
       name: selectedReservation.value.name,
       phone: selectedReservation.value.phone,
@@ -291,7 +295,7 @@ function cancelEditReservation() {
 }
 
 function closeSession() {
-  sessionStorage.removeItem('authToken');
+  localStorage.removeItem('authToken');
   router.push('/calendar');
 }
 

@@ -16,7 +16,7 @@ async function login() {
     console.log(userCredential)
     const accessToken = await userCredential.user.getIdToken();
 
-    sessionStorage.setItem('authToken', accessToken);
+    localStorage.setItem('authToken', accessToken);
 
     router.push('/admin');
   } catch (error) {
