@@ -19,7 +19,7 @@ const queryTestCode = route.query['test-mode'];
 
 moment.locale('es');
 
-const reservationStatus = ['paid', 'pending', 'canceled'];
+const reservationStatus = ['paid', 'pending', 'cancelled'];
 const headers = [
   {
     align: 'center',
@@ -156,7 +156,7 @@ function setStatusColor(status) {
       return 'green';
     case 'pending':
       return 'orange';
-    case 'canceled':
+    case 'cancelled':
       return 'red';
     default:
       return 'grey';
