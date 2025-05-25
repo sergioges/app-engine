@@ -322,7 +322,7 @@ onMounted(() => {
     <p>Por favor inténtalo de nuevo más tarde. Para cualquier duda, puedes escribirnos a <a
         href='mailto:cucadellumcasarural@gmail.com'>nuestro mail.</a></p>
   </v-alert>
-  <v-container v-if="showEditForm">
+  <v-container v-if="showEditForm" class="container">
     <v-card class="pa-4">
       <v-card-title class="text-h5">Editar Reserva</v-card-title>
       <v-card-text>
@@ -420,6 +420,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.v-container {
+  max-width: max-content;
+}
+
 .v-card {
   max-width: 600px;
   margin: auto;
