@@ -16,7 +16,6 @@ async function login() {
     const accessToken = await userCredential.user.getIdToken();
 
     localStorage.setItem('authToken', accessToken);
-
     router.push('/admin');
   } catch (error) {
     if (error.code && error.code.startsWith('auth/')) {

@@ -47,7 +47,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth) {
     if (!authToken) {
       console.warn('No se encontró authToken. Redirigiendo al login...');
-      return next('/login');
+      return next({ path: '/login', replace: true });
     }
     return next();
   }
