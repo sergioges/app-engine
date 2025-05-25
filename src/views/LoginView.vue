@@ -13,7 +13,6 @@ async function login() {
   const auth = getAuth();
   try {
     const userCredential = await signInWithEmailAndPassword(auth, username.value, password.value);
-    console.log(userCredential)
     const accessToken = await userCredential.user.getIdToken();
 
     localStorage.setItem('authToken', accessToken);
