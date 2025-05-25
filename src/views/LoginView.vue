@@ -16,7 +16,11 @@ async function login() {
     const accessToken = await userCredential.user.getIdToken();
 
     localStorage.setItem('authToken', accessToken);
-    router.push('/admin');
+
+    // Avoid no login when access before by admin.
+    setTimeout(() => {
+      router.push('/admin');
+    }, 500);
   } catch (error) {
     if (error.code && error.code.startsWith('auth/')) {
       showError.value = true;
