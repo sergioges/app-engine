@@ -64,7 +64,7 @@ const phoneValidation = ref([
   v => /^\d{10}$/.test(v) || 'Teléfono inválido (debe ser un número mexicano válido)'
 ]);
 
-const dbName = queryTestCode === 'enable' ? 'test-cuca' : 'reservations' 
+const dbName = queryTestCode === 'enable' ? 'test-cuca' : 'reservations'
 
 const isMobile = computed(() => display.smAndDown);
 const isDesktop = computed(() => display.mdAndUp);
@@ -87,13 +87,13 @@ const totalNights = computed(() => {
   return moment(end).diff(moment(start), 'days');
 });
 
+// Filtra las reservas con estado "pending" o "paid".
 const disabledDates = computed(() => {
-  // Filtra las reservas con estado "pending" o "paid"
   const filteredReservations = reservations.filter(
     (reservation) => reservation.status === 'paid'
   );
 
-  // Extrae y aplana todas las fechas (dates) de las reservas filtradas
+  // Extrae y aplana todas las fechas (dates) de las reservas filtradas.
   const allDates = filteredReservations.flatMap((reservation) => reservation.dates);
 
   return [...new Set(allDates)]; // Elimina duplicados
@@ -309,7 +309,9 @@ onUnmounted(() => {
               <v-text-field v-model="contactData.phone" required :rules="phoneValidation" label="Teléfono"
                 prepend-icon="mdi-phone" hide-details="auto" variant="solo" type="tel">
               </v-text-field>
-              <v-checkbox v-model="contactData.marketingEnabled" color="success" label="¿Te gustaría recibir información de Amealco y conocer nuestras promociones?" hide-details="auto" variant="solo"></v-checkbox>
+              <v-checkbox v-model="contactData.marketingEnabled" color="success"
+                label="¿Te gustaría recibir información de Amealco y conocer nuestras promociones?" class="text-left"
+                hide-details="auto" variant="solo"></v-checkbox>
             </v-col>
           </v-row>
           <v-row v-if="!isPaymentAvailable || totalNights >= 6" class="d-flex justify-center">
@@ -324,7 +326,8 @@ onUnmounted(() => {
               </v-btn>
             </v-col>
           </v-row>
-          <v-row v-if="!isTestPaymentAvailable && isPaymentAvailable && totalNights <= 5" class="d-flex justify-center">
+          <v-row v-if="!isTestPaymentAvailable && isPaymentAvailable && totalNights <= 5" align="center"
+            justify="center">
             <v-col cols="12" md="6">
               <p>Tienes {{ formattedCountdown }} minutos para realizar el pago.</p>
               <br />
@@ -353,10 +356,15 @@ onUnmounted(() => {
                   publishable-key="pk_live_51RQD8CFmAngK1tZ7z0ErZpkdlXcmDv3eya6zGyD0ArqWY56AshHwlO1npQvKpfVsCId93vsxKQ6SfReYrvrUy9m300zptFLD1e">
                 </stripe-buy-button>
               </div>
-              <v-btn class="resetBtn" color="error" block @click="resetData">
-                Borrar
-              </v-btn>
             </v-col>
+            <v-col cols="12" md="6">
+              <p>Si prefieres realizar el pago mediante transferencia bancaria. Envía un mensaje vía Whatsapp.</p>
+              <v-btn density="default" color="primary" prepend-icon="mdi-whatsapp" class="text-none mt-6 contact-btn"
+                @click="sendWhatsapp">Contacta</v-btn>
+            </v-col>
+            <v-btn class="reset-btn" color="error" @click="resetData">
+              Borrar
+            </v-btn>
           </v-row>
           <v-row v-if="isTestPaymentAvailable && isPaymentAvailable" align="center" justify="center">
             <v-col cols="12" md="6">
@@ -368,14 +376,12 @@ onUnmounted(() => {
             </v-col>
             <v-col cols="12" md="6">
               <p>Si prefieres realizar el pago mediante transferencia bancaria. Envía un mensaje vía Whatsapp.</p>
-              <v-btn 
-                density="default" 
-                color="primary" 
-                prepend-icon="mdi-whatsapp" 
-                class="text-none mt-6 contact-btn"
-                @click="sendWhatsapp"
-              >Contacta</v-btn>
+              <v-btn density="default" color="primary" prepend-icon="mdi-whatsapp" class="text-none mt-6 contact-btn"
+                @click="sendWhatsapp">Contacta</v-btn>
             </v-col>
+            <v-btn class="reset-btn" color="error" block @click="resetData">
+              Borrar
+            </v-btn>
           </v-row>
         </v-form>
       </v-col>
@@ -483,6 +489,13 @@ h2 {
   display: flex;
   padding: 20px 40px;
   margin: 0 auto;
+}
+
+.reset-btn {
+  display: flex;
+  padding: 20px 55px;
+  margin: 0 auto;
+  margin-bottom: 20px;
 }
 
 .custom-footer {
