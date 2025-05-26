@@ -1,13 +1,12 @@
 <script setup>
 import { ref, computed, reactive, onMounted, onUnmounted, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
-import { auth } from '../plugins/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-
 import { db } from '../plugins/firebase';
-import { collection, addDoc, updateDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, updateDoc } from 'firebase/firestore';
+
+import { useReservationStore } from '../stores/reservationStore'
 
 import moment from 'moment';
 import 'moment/dist/locale/es';
@@ -19,7 +18,13 @@ import { useDisplay } from 'vuetify';
 
 const display = useDisplay();
 const route = useRoute();
+
+const reservationStore = useReservationStore();
+const { fetchReservations } = reservationStore
+const { reservations } = storeToRefs(reservationStore)
+
 const queryTestCode = route.query['test-mode'];
+const dbName = queryTestCode === 'enable' ? 'test-cuca' : 'reservations'
 
 moment.locale('es');
 
@@ -38,7 +43,6 @@ const footerIcons = [
   },
 ]
 
-const reservations = reactive([])
 const reservationDates = ref([]);
 const hosts = ref(1);
 const pets = ref('No');
@@ -64,8 +68,6 @@ const phoneValidation = ref([
   v => /^\d{10}$/.test(v) || 'Teléfono inválido (debe ser un número mexicano válido)'
 ]);
 
-const dbName = queryTestCode === 'enable' ? 'test-cuca' : 'reservations'
-
 const isMobile = computed(() => display.smAndDown);
 const isDesktop = computed(() => display.mdAndUp);
 
@@ -87,16 +89,16 @@ const totalNights = computed(() => {
   return moment(end).diff(moment(start), 'days');
 });
 
-// Filtra las reservas con estado "pending" o "paid".
+// Filter reservations with status “pending” or “paid”.
 const disabledDates = computed(() => {
-  const filteredReservations = reservations.filter(
+  const filteredReservations = reservations.value.filter(
     (reservation) => reservation.status === 'paid'
   );
 
-  // Extrae y aplana todas las fechas (dates) de las reservas filtradas.
+  // Extract and flatten all the dates from the filtered reservations.
   const allDates = filteredReservations.flatMap((reservation) => reservation.dates);
 
-  return [...new Set(allDates)]; // Elimina duplicados
+  return [...new Set(allDates)]; // Eliminate duplicates.
 });
 
 const formattedCountdown = computed(() => {
@@ -105,62 +107,13 @@ const formattedCountdown = computed(() => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 });
 
-// async function registerUser(email, password) {
-//   try {
-//     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-//     console.log('Usuario registrado:', userCredential.user);
-//   } catch (error) {
-//     console.error('Error al registrar usuario:', error.message);
-//   }
-// }
-
-async function loginUser(email, password) {
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    console.error('Error al iniciar sesión:', error.message);
-  }
-}
-
-loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD);
-
-async function fetchReservations() {
-  // Clean up the reservations array before fetching new data.
-  reservations.splice(0);
-  try {
-    const querySnapshot = await getDocs(collection(db, dbName));
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      reservations.push({
-        id: doc.id,
-        createdAt: new Date(data.createdAt).toLocaleString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        dates: data.dates,
-        totalNights: data.totalNights,
-        hosts: data.hosts,
-        pets: data.pets,
-        status: data.status,
-      });
-    });
-  } catch (error) {
-    console.error('Error al obtener las reservas:', error);
-  }
-}
-
 function getDatesInRange(startDate, endDate) {
   const dates = [];
   let currentDate = moment(startDate).startOf('day');
   const finalDate = moment(endDate).startOf('day');
 
   while (currentDate.isSameOrBefore(finalDate)) {
-    // Establece la hora a las 00:00:00 y convierte a formato ISO
+    // Set the time to 00:00:00 and convert to ISO format.
     const normalizedDate = moment(currentDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
     dates.push(normalizedDate);
     currentDate.add(1, 'day');
@@ -226,11 +179,15 @@ function sendWhatsapp() {
 }
 
 onMounted(() => {
-  fetchReservations();
+  fetchReservations(dbName);
+
+  // Stripe button.
   const script = document.createElement('script');
   script.src = "https://js.stripe.com/v3/buy-button.js";
   script.async = true;
   document.head.appendChild(script);
+
+  // Testing mode test-mode=enable.
   if (queryTestCode === 'enable') isTestPaymentAvailable.value = true
 });
 
