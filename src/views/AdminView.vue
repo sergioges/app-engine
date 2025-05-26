@@ -1,10 +1,13 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useRouter, useRoute } from 'vue-router';
 import { useDisplay } from 'vuetify';
 
 import { db } from '../plugins/firebase';
-import { collection, updateDoc, getDocs, doc, getDoc } from 'firebase/firestore';
+import { updateDoc, doc, getDoc } from 'firebase/firestore';
+
+import { useReservationStore } from '../stores/reservationStore'
 
 import moment from 'moment';
 import 'moment/dist/locale/es';
@@ -15,6 +18,11 @@ import '@vuepic/vue-datepicker/dist/main.css'
 const display = useDisplay();
 const router = useRouter();
 const route = useRoute();
+
+const reservationStore = useReservationStore();
+const { fetchReservations } = reservationStore
+const { reservations } = storeToRefs(reservationStore)
+
 const queryTestCode = route.query['test-mode'];
 
 moment.locale('es');
@@ -83,7 +91,6 @@ const headers = [
   },
 ]
 
-const reservations = reactive([])
 const selectedReservation = ref({
   id: '',
   createdAt: '',
@@ -108,22 +115,22 @@ const isDesktop = computed(() => display.mdAndUp);
 const dbName = queryTestCode === 'enable' ? 'test-cuca' : 'reservations' 
 
 const disabledDates = computed(() => {
-  // Filtra las reservas con estado "pending" o "paid"
-  const filteredReservations = reservations.filter(
+  // Filter reservations with status “pending” or “paid”.
+  const filteredReservations = reservations.value.filter(
     (reservation) => reservation.status === 'paid'
   );
 
-  // Extrae y aplana todas las fechas (dates) de las reservas filtradas
+  // Extract and flatten all the dates from the filtered reservations.
   const allDates = filteredReservations.flatMap((reservation) => reservation.dates);
 
-  // Normaliza las fechas para que todas tengan hora 00:00 y elimina duplicados
+  // Normalize the dates so that all have time set to 00:00 and remove duplicates.
   const normalizedDates = allDates.map((date) => {
     const normalizedDate = new Date(date);
-    normalizedDate.setHours(0, 0, 0, 0); // Establece la hora a las 00:00
-    return normalizedDate.toISOString(); // Convierte a formato ISO
+    normalizedDate.setHours(0, 0, 0, 0); // Set the time to 00:00.
+    return normalizedDate.toISOString(); // Convert to ISO format.
   });
 
-  return [...new Set(normalizedDates)]; // Elimina duplicados
+  return [...new Set(normalizedDates)]; // Eliminate duplicates.
 });
 
 const maxDate = computed(() => {
@@ -160,36 +167,6 @@ function setStatusColor(status) {
       return 'red';
     default:
       return 'grey';
-  }
-}
-
-async function fetchReservations() {
-  // Clean up the reservations array before fetching new data.
-  reservations.splice(0);
-  try {
-    const querySnapshot = await getDocs(collection(db, dbName));
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      reservations.push({
-        id: doc.id,
-        createdAt: new Date(data.createdAt).toLocaleString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        dates: data.dates,
-        totalNights: data.totalNights,
-        hosts: data.hosts,
-        pets: data.pets,
-        status: data.status,
-      });
-    });
-  } catch (error) {
-    console.error('Error al obtener las reservas:', error);
   }
 }
 
@@ -233,10 +210,10 @@ function getDatesInRange(startDate, endDate) {
   const finalDate = moment(endDate).startOf('day');
 
   while (currentDate.isSameOrBefore(finalDate)) {
-    // Convierte la fecha a un objeto Date y establece la hora a las 00:00:00
+    // Convert the date to a Date object and set the time to 00:00:00.
     const normalizedDate = moment(currentDate).startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-    dates.push(normalizedDate); // Agrega la fecha en formato ISO
-    currentDate.add(1, 'day'); // Avanza un día
+    dates.push(normalizedDate); // Add the date in ISO format.
+    currentDate.add(1, 'day'); // Move forward one day.
   }
 
   return dates;
@@ -264,7 +241,7 @@ async function updateReservation() {
     setTimeout(() => {
       showSuccess.value = false;
     }, 5000);
-    await fetchReservations();
+    await fetchReservations(dbName);
     cancelEditReservation();
 
   } catch (error) {
@@ -306,7 +283,7 @@ function getTotalNights(dateVal) {
 }
 
 onMounted(() => {
-  fetchReservations();
+  fetchReservations(dbName);
 });
 </script>
 
