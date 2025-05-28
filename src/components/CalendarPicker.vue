@@ -45,7 +45,6 @@ const totalNights = computed(() => {
 
 // Filter reservations with status “pending” or “paid”.
 const disabledDates = computed(() => {
-  console.log(reservations.value)
   const filteredReservations = reservations.value.filter(
     (reservation) => reservation.status === 'paid'
   );
