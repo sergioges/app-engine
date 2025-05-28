@@ -27,9 +27,11 @@ export const useAuthStore = defineStore('reservation', () => {
     }
   }
 
+  
+  // TODO Pass loginDataBase into App.vue. Figure it out why is not working there.
   onMounted(() => {
     loginDataBase(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD);
   })
 
-  return { };
+  return { loginDataBase };
 })
