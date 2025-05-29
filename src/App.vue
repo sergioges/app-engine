@@ -2,22 +2,23 @@
 import { onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { useReservationStore } from './stores/reservationStore'
+import { useReservationStore } from '@store/reservationStore'
 
 const route = useRoute();
 
 const reservationStore = useReservationStore();
-const { fetchReservations } = reservationStore
+const { fetchReservations, setDbName } = reservationStore
 
 const dbName = computed(() => route.query['test-mode'] === 'enable' ? 'test-cuca' : 'reservations');
 
 onMounted(async () => {
-  await fetchReservations(dbName.value);
+  await fetchReservations();
 });
 
 // For testing porpuses, need to watch if there is a test query param - test-mode=enable
-watch(dbName, (newVal) => {
-  fetchReservations(newVal);
+watch(dbName, async (newVal) => {
+  setDbName(newVal);
+  await fetchReservations();
 })
 </script>
 
