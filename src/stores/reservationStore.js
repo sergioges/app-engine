@@ -1,17 +1,22 @@
-import { reactive } from 'vue';
+import { ref, reactive } from 'vue';
 import { defineStore } from 'pinia';
 
 import { db } from '../plugins/firebase';
-import { collection, addDoc, updateDoc, getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 export const useReservationStore = defineStore('reservation', () => {
   const reservations = reactive([])
+  const dbName = ref('reservations')
 
-  async function fetchReservations(dbName = 'reservations') {
+  function setDbName(newDbName) {
+    dbName.value = newDbName;
+  }
+
+  async function fetchReservations() {
     // Clean up the reservations array before fetching new data.
     reservations.splice(0);
     try {
-      const querySnapshot = await getDocs(collection(db, dbName));
+      const querySnapshot = await getDocs(collection(db, dbName.value));
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         reservations.push({
@@ -41,5 +46,5 @@ export const useReservationStore = defineStore('reservation', () => {
     reservations.push(newRes);
   }
 
-  return { reservations, fetchReservations, addReservation };
+  return { reservations, dbName, setDbName, fetchReservations, addReservation };
 });

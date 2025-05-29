@@ -7,7 +7,7 @@ import { useDisplay } from 'vuetify';
 import { db } from '../plugins/firebase';
 import { updateDoc, doc, getDoc } from 'firebase/firestore';
 
-import { useReservationStore } from '../stores/reservationStore'
+import { useReservationStore } from '@store/reservationStore'
 
 import moment from 'moment';
 import 'moment/dist/locale/es';

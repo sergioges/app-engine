@@ -5,15 +5,16 @@ import { fileURLToPath, URL } from 'url';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue({
-    resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-      },
-    },
     template: {
       compilerOptions: {
         isCustomElement: (tag) => tag === 'stripe-buy-button'
       }
     }
-  })]
+  })],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@store': fileURLToPath(new URL('./src/stores', import.meta.url)),
+    },
+  },
 })

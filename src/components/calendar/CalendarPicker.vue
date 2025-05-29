@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
-import { useReservationStore } from '../stores/reservationStore'
+import { useReservationStore } from '@store/reservationStore'
 
 import { useDisplay } from 'vuetify';
 
@@ -52,7 +52,12 @@ const disabledDates = computed(() => {
   // Extract and flatten all the dates from the filtered reservations.
   const allDates = filteredReservations.flatMap((reservation) => reservation.dates);
 
-  return [...new Set(allDates)]; // Eliminate duplicates.
+  // Add the current and the next day to be disabled.
+  const today = moment().startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+  const tomorrow = moment().add(1, 'day').startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+
+  return [...new Set([...allDates, today, tomorrow])]; // Eliminate duplicates.
+
 });
 
 watch(totalNights, (newVal) => {
