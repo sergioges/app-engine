@@ -12,7 +12,7 @@ import moment from 'moment';
 import 'moment/dist/locale/es';
 
 const reservationStore = useReservationStore();
-const { dbName } = (reservationStore)
+const { dbName, fetchReservations } = reservationStore
 
 moment.locale('es');
 
@@ -49,6 +49,10 @@ watch(isPaymentAvailable, (newVal) => {
   }
 })
 
+onMounted(async() => {
+  await fetchReservations()
+})
+
 onUnmounted(() => {
   sessionStorage.removeItem('idReservation')
 })
@@ -71,10 +75,8 @@ onUnmounted(() => {
       <v-col class="d-flex flex-column ga-4" cols="12" md="8">
         <CalendarHeader />
         <CalendarPicker v-model="reservationDates" @update:totalNights="totalNights = $event" />
-        <!--star form-->
         <CalendarForm v-model:showSuccess="showSuccess" v-model:showError="showError" v-model:reservationDates="reservationDates"
           v-model:isPaymentAvailable="isPaymentAvailable" v-model:isTestPaymentAvailable="isTestPaymentAvailable" :total-nights="totalNights" />
-        <!--end form-->
       </v-col>
     </v-row>
     <FooterApp />

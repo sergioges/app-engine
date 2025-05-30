@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, reactive, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import { db } from '@/plugins/firebase';
 import { collection, addDoc, updateDoc } from 'firebase/firestore';
@@ -10,6 +11,8 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js'
 
 import moment from 'moment';
 import 'moment/dist/locale/es';
+
+const route = useRoute();
 
 const reservationStore = useReservationStore();
 const { dbName } = reservationStore
@@ -87,7 +90,7 @@ async function sendData() {
         totalNights: props.totalNights,
         status: 'pending',
         createdAt: moment().toISOString(),
-        isBrevoActive: dbName === 'reservations'
+        isBrevoDisabled: route.query?.brevo === 'disable'
       };
 
       const docRef = await addDoc(collection(db, dbName), reservationData);
