@@ -40,6 +40,7 @@ function openLink(url) {
     <div>
       {{ new Date().getFullYear() }} — <strong>Cuca de Llum - Casa de Campo</strong>
     </div>
+    <em class="reservame">Powered by: <a href="https://reservame-agenda-digital.web.app/" target="_blank">ReservaMe - Agenda Digital</a></em>
   </v-footer>
 </template>
 
@@ -47,5 +48,10 @@ function openLink(url) {
 .custom-footer {
   background-color: #665745;
   color: white;
+}
+
+.reservame a {
+  text-decoration: underline;
+  color: #fff;
 }
 </style>
