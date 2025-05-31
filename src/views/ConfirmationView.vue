@@ -2,6 +2,8 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import FooterApp from '@/components/FooterApp.vue';
+
 import { db } from '../plugins/firebase';
 import { auth } from '../plugins/firebase';
 import { updateDoc, doc } from 'firebase/firestore';
@@ -110,30 +112,7 @@ onUnmounted(() => {
         </v-row>
       </v-col>
     </v-row>
-    <v-footer class="custom-footer text-center d-flex flex-column ga-2 py-4">
-      <div class="d-flex ga-3">
-        <v-btn v-for="item in footerIcons" :key="item.icon" :icon="item.icon" density="comfortable" variant="text"
-          @click="openLink(item.url)"></v-btn>
-      </div>
-
-      <v-divider class="my-2" thickness="2" width="50"></v-divider>
-
-      <div class="text-caption font-weight-regular opacity-60">
-        Aunque suene curioso, “Cuca de Llum” no es una expresión típica mexicana, ¡pero tiene una historia muy especial!
-        En
-        algunas zonas de habla catalana (Cataluña, España), “Cuca de llum” significa literalmente luciérnaga. Es una
-        forma
-        poética y tierna de referirse a ese pequeño insecto que brilla en la oscuridad. La palabra “llum” significa luz,
-        y
-        “cuca” puede referirse a un bichito.
-      </div>
-
-      <v-divider></v-divider>
-
-      <div>
-        {{ new Date().getFullYear() }} — <strong>Cuca de Llum - Casa de Campo</strong>
-      </div>
-    </v-footer>
+    <FooterApp />
   </v-container>
 </template>
 
@@ -167,12 +146,5 @@ h1 {
 
 .contact-info p {
   margin: 0.5rem 0;
-}
-
-.custom-footer {
-  background-color: #665745;
-  color: white;
-  margin-top: auto;
-  max-height: fit-content;
 }
 </style>
