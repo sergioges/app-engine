@@ -90,7 +90,7 @@ async function sendData() {
         totalNights: props.totalNights,
         status: 'pending',
         createdAt: moment().toISOString(),
-        isBrevoDisabled: route.query?.brevo === 'disable'
+        isBrevoDisabled: route.query?.brevo === 'disabled'
       };
 
       const docRef = await addDoc(collection(db, dbName), reservationData);
