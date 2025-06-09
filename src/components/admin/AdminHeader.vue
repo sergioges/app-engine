@@ -3,6 +3,4 @@
   <p>Esta es la vista de todas tus reservas registradas</p>
 </template>
 
-<style lang="css" scoped>
-
-</style>
+<style lang="css" scoped></style>

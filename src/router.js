@@ -1,23 +1,23 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import LoginView from './views/LoginView.vue';
-import CalendarView from './views/CalendarView.vue';
-import AdminView from './views/AdminView.vue';
-import ConfirmationView from './views/ConfirmationView.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+import LoginView from './views/LoginView.vue'
+import CalendarView from './views/CalendarView.vue'
+import AdminView from './views/AdminView.vue'
+import ConfirmationView from './views/ConfirmationView.vue'
 
 const routes = [
-    {
-        path: '/',
-        redirect: '/calendar',
-    },
-    {
-        path: '/login',
-        name: 'Login',
-        component: LoginView,
-      },
+  {
+    path: '/',
+    redirect: '/calendar'
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView
+  },
   {
     path: '/calendar',
     name: 'Calendar',
-    component: CalendarView,
+    component: CalendarView
   },
   {
     path: '/admin',
@@ -28,30 +28,30 @@ const routes = [
   {
     path: '/confirmation',
     name: 'Confirmation',
-    component: ConfirmationView,
+    component: ConfirmationView
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/calendar',
-  },
-];
+    redirect: '/calendar'
+  }
+]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
-});
+  routes
+})
 
 router.beforeEach(async (to, from, next) => {
-  const authToken = localStorage.getItem('authToken');
+  const authToken = localStorage.getItem('authToken')
 
   if (to.meta.requiresAuth) {
     if (!authToken) {
-      console.warn('No se encontró authToken. Redirigiendo al login...');
-      return next({ path: '/login', replace: true });
+      console.warn('No se encontró authToken. Redirigiendo al login...')
+      return next({ path: '/login', replace: true })
     }
-    return next();
+    return next()
   }
-  next();
-});
+  next()
+})
 
-export default router;
+export default router
