@@ -1,4 +1,3 @@
-import { onMounted } from 'vue'
 import { defineStore } from 'pinia'
 
 import { auth } from '../plugins/firebase'
@@ -6,7 +5,7 @@ import { auth } from '../plugins/firebase'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 
-export const useAuthStore = defineStore('reservation', () => {
+export const useAuthStore = defineStore('auth', () => {
   // CREATE USER
   // async function registerUser(email, password) {
   //   try {
@@ -25,11 +24,6 @@ export const useAuthStore = defineStore('reservation', () => {
       console.error('Error al iniciar la app:', error.message)
     }
   }
-
-  // TODO Pass loginDataBase into App.vue. Figure it out why is not working there.
-  onMounted(() => {
-    loginDataBase(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD)
-  })
 
   return { loginDataBase }
 })
