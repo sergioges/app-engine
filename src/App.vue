@@ -1,11 +1,14 @@
 <script setup>
-  import { computed, watch } from 'vue'
+  import { computed, onBeforeMount, watch } from 'vue'
   import { useRoute } from 'vue-router'
 
+  import { useAuthStore } from '@store/authStore'
   import { useReservationStore } from '@store/reservationStore'
 
   const route = useRoute()
 
+  const authStore = useAuthStore()
+  const { loginDataBase } = authStore
   const reservationStore = useReservationStore()
   const { setDbName } = reservationStore
 
@@ -21,6 +24,10 @@
     },
     { immediate: true }
   )
+
+  onBeforeMount(async () => {
+    await loginDataBase(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD)
+  })
 </script>
 
 <template>

@@ -30,11 +30,6 @@
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
   })
 
-  onMounted(() => {
-    // Testing mode test-mode=enable.
-    if (dbName === 'test-cuca') isTestPaymentAvailable.value = true
-  })
-
   watch(isPaymentAvailable, newVal => {
     if (newVal) {
       countdown.value = 180
@@ -51,6 +46,7 @@
 
   onMounted(async () => {
     await fetchReservations()
+    if (dbName === 'test-cuca') isTestPaymentAvailable.value = true
   })
 
   onUnmounted(() => {
