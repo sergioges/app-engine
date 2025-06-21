@@ -8,6 +8,8 @@
 
   import { useReservationStore } from '@store/reservationStore'
 
+  import { config } from '@plugin/config'
+
   import moment from 'moment'
   import 'moment/dist/locale/es'
 
@@ -47,7 +49,7 @@
 
   onMounted(async () => {
     await fetchReservations()
-    if (dbName === 'test-cuca') isTestPaymentAvailable.value = true
+    if (dbName === config.dbNameTest) isTestPaymentAvailable.value = true
   })
 
   onUnmounted(() => {

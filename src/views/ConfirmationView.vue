@@ -12,10 +12,14 @@
   const route = useRoute()
   const router = useRouter()
 
+  import { config } from '@plugin/config'
+
   const idReservation = sessionStorage.getItem('idReservation')
   // For testing porpuses.
   const dbName =
-    'testing' in route.query && route.query.testing === 'enabled' ? 'test-cuca' : 'reservations'
+    'testing' in route.query && route.query.testing === 'enabled'
+      ? config.dbNameTest
+      : config.dbNameProd
 
   const shuffledNumbers = ref([])
 
