@@ -1,8 +1,10 @@
 <script setup>
+  import { config } from '@plugin/config'
+
   const footerIcons = [
     {
       icon: 'mdi-whatsapp',
-      url: 'https://api.whatsapp.com/send?phone=524423620391&text=Hola!%20Estoy%20interesad@%20en%20recibir%20más%20información%20de%20Cuca%20de%20Llum.'
+      url: `https://api.whatsapp.com/send?phone=${config.whatsApp}&text=Hola!%20Estoy%20interesad@%20en%20recibir%20más%20información%20de%20Cuca%20de%20Llum.`
     },
     {
       icon: 'mdi-mail',

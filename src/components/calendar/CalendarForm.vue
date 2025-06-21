@@ -7,6 +7,8 @@
 
   import { useReservationStore } from '@store/reservationStore'
 
+  import { config } from '@plugin/config'
+
   import { parsePhoneNumberFromString } from 'libphonenumber-js'
 
   import moment from 'moment'
@@ -60,7 +62,7 @@
   })
 
   const isWeekdaysOnly = computed(() => {
-    // If no dates are selected, return false
+    // If no dates are selected, return false.
     if (!reservationDates.value || reservationDates.value.length !== 2) {
       return false
     }
@@ -72,7 +74,7 @@
     for (let day = moment(start); day.isBefore(end); day.add(1, 'days')) {
       const dayOfWeek = day.day()
 
-      // If it's a weekend day (0 or 6), it's not a weekdays-only reservation
+      // If it's a weekend day (0 or 6), it's not a weekdays-only reservation.
       if (dayOfWeek === 0 || dayOfWeek === 6) {
         return false
       }
@@ -162,7 +164,7 @@
 
   function sendWhatsapp() {
     window.open(
-      'https://api.whatsapp.com/send?phone=524423620391&text=Hola!%20Acabo%20de%20realizar%20una%20reserva%20para%20Cuca%20de%20Llum...',
+      `https://api.whatsapp.com/send?phone=${config.whatsApp}&text=Hola!%20Acabo%20de%20realizar%20una%20reserva%20para%20Cuca%20de%20Llum...`,
       '_blank'
     )
   }
