@@ -31,6 +31,7 @@
   const showError = defineModel('showError')
   const isPaymentAvailable = defineModel('isPaymentAvailable')
   const isTestPaymentAvailable = defineModel('isTestPaymentAvailable')
+  const emit = defineEmits(['weekDays'])
 
   const hosts = ref(1)
   const pets = ref('No')
@@ -56,6 +57,33 @@
     const minutes = Math.floor(countdown.value / 60)
     const seconds = countdown.value % 60
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
+  })
+
+  const isWeekdaysOnly = computed(() => {
+    // If no dates are selected, return false
+    if (!reservationDates.value || reservationDates.value.length !== 2) {
+      return false
+    }
+
+    const [startDate, endDate] = reservationDates.value
+    const start = moment(startDate)
+    const end = moment(endDate)
+
+    for (let day = moment(start); day.isBefore(end); day.add(1, 'days')) {
+      const dayOfWeek = day.day()
+
+      // If it's a weekend day (0 or 6), it's not a weekdays-only reservation
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        return false
+      }
+    }
+
+    const endDayOfWeek = end.day()
+    if (endDayOfWeek === 0 || endDayOfWeek === 6) {
+      return false
+    }
+
+    return true
   })
 
   // Pass all the dates between the start and the end date.
@@ -160,6 +188,10 @@
         }
       }, 1000)
     }
+  })
+
+  watch(isWeekdaysOnly, newVal => {
+    emit('weekDays', newVal)
   })
 </script>
 

@@ -23,6 +23,7 @@
   const showError = ref(false)
   const isPaymentAvailable = ref(false)
   const isTestPaymentAvailable = ref(false)
+  const isWeeksDaysOnly = ref(false)
 
   const formattedCountdown = computed(() => {
     const minutes = Math.floor(countdown.value / 60)
@@ -64,15 +65,22 @@
       border="end"
       closable
     >
-      <p v-if="totalNights >= 3">
+      <p v-if="totalNights >= 6">
         Tan pronto revisemos tu solucitud nos pondremos en conacto contigo. Si lo deseas, puedes
         escribirnos a
         <a href="mailto:cucadellumcasarural@gmail.com">nuestro mail.</a>
       </p>
-      <p v-else>
-        Ahora continua con el proceso de pago. Recuerda que tienes {{ formattedCountdown }} minutos
-        para realizarlo.
-      </p>
+      <div v-else>
+        <p>
+          Ahora continua con el proceso de pago. Recuerda que tienes
+          {{ formattedCountdown }} minutos para realizarlo.
+        </p>
+        <p v-if="isWeeksDaysOnly">
+          Ahhh!!! y como vemos que has hecho una reserva entre semana, tienes el cupón
+          <strong>VERANO25 donde te ofrecemos un 30% de descuento</strong>
+          en el total de la reserva.
+        </p>
+      </div>
     </v-alert>
     <v-alert
       v-if="showError"
@@ -97,6 +105,7 @@
           v-model:reservationDates="reservationDates"
           v-model:isPaymentAvailable="isPaymentAvailable"
           v-model:isTestPaymentAvailable="isTestPaymentAvailable"
+          @weekDays="isWeeksDaysOnly = $event"
           :total-nights="totalNights"
         />
       </v-col>
