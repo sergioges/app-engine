@@ -8,7 +8,7 @@
   const route = useRoute()
 
   const authStore = useAuthStore()
-  const { loginDataBase } = authStore
+  const { signInAnonymously } = authStore
   const reservationStore = useReservationStore()
   const { setDbName } = reservationStore
 
@@ -26,7 +26,7 @@
   )
 
   onBeforeMount(async () => {
-    await loginDataBase(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD)
+    await signInAnonymously()
   })
 </script>
 

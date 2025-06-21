@@ -1,11 +1,18 @@
+import { reactive } from 'vue'
 import { defineStore } from 'pinia'
+
+import { signInAnonymously as firebaseSignInAnonymously } from 'firebase/auth'
 
 import { auth } from '../plugins/firebase'
 
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+// import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 
 export const useAuthStore = defineStore('auth', () => {
+  const anonymousUser = reactive({
+    credential: null,
+    isAuthenticated: false
+  })
+
   // CREATE USER
   // async function registerUser(email, password) {
   //   try {
@@ -17,13 +24,24 @@ export const useAuthStore = defineStore('auth', () => {
   // }
 
   // LOGIN USER
-  async function loginDataBase(email, password) {
+  // async function loginDataBase(email, password) {
+  //   try {
+  //     await signInWithEmailAndPassword(auth, email, password)
+  //   } catch (error) {
+  //     console.error('Error al iniciar la app:', error.message)
+  //   }
+  // }
+
+  async function signInAnonymously() {
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await firebaseSignInAnonymously(auth)
+      anonymousUser.credential = userCredential.user
+      anonymousUser.isAuthenticated = true
     } catch (error) {
-      console.error('Error al iniciar la app:', error.message)
+      console.error('Error in anonymous authentication:', error)
+      throw error
     }
   }
 
-  return { loginDataBase }
+  return { anonymousUser, signInAnonymously }
 })

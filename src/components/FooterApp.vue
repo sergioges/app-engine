@@ -50,9 +50,17 @@
     </div>
     <em class="reservame">
       Powered by:
-      <a href="https://reservame-agenda-digital.web.app/" target="_blank">
-        ReservaMe - Agenda Digital
-      </a>
+      <v-btn
+        prepend-icon="mdi-calendar-check-outline"
+        rounded="lg"
+        variant="outlined"
+        color="white"
+        size="small"
+        class="button"
+        @click="openLink('https://reservame-agenda-digital.com/')"
+      >
+        ReservaMe
+      </v-btn>
     </em>
   </v-footer>
 </template>
@@ -66,5 +74,14 @@
   .reservame a {
     text-decoration: underline;
     color: #fff;
+  }
+
+  .button {
+    text-transform: none !important;
+  }
+
+  .button:hover {
+    color: #fff !important;
+    border-color: #fff !important;
   }
 </style>
