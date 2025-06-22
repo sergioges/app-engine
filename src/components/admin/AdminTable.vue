@@ -1,12 +1,8 @@
 <script setup>
-  import { useRouter } from 'vue-router'
-
   import { useReservationStore } from '@store/reservationStore'
 
   import moment from 'moment'
   import 'moment/dist/locale/es'
-
-  const router = useRouter()
 
   const reservationStore = useReservationStore()
   const { reservations } = reservationStore
@@ -96,11 +92,6 @@
         return 'grey'
     }
   }
-
-  function closeSession() {
-    localStorage.removeItem('authToken')
-    router.push('/calendar')
-  }
 </script>
 
 <template>
@@ -137,11 +128,6 @@
             </v-chip>
           </template>
         </v-data-table-virtual>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col class="d-flex justify-end">
-        <v-btn @click="closeSession" color="error">Cerrar sesión</v-btn>
       </v-col>
     </v-row>
   </v-container>

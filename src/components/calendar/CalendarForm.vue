@@ -61,8 +61,8 @@
     return `${minutes}:${seconds.toString().padStart(2, '0')}`
   })
 
+  // Action to define weekdays marketing discount campaing.
   const isWeekdaysOnly = computed(() => {
-    // If no dates are selected, return false.
     if (!reservationDates.value || reservationDates.value.length !== 2) {
       return false
     }
