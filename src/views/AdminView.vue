@@ -4,6 +4,7 @@
   import AdminHeader from '@/components/admin/AdminHeader.vue'
   import AdminTable from '@/components/admin/AdminTable.vue'
   import AdminForm from '@/components/admin/AdminForm.vue'
+  import AdminDisabledDays from '@/components/admin/AdminDisabledDays.vue'
 
   import { db } from '../plugins/firebase'
   import { doc, getDoc } from 'firebase/firestore'
@@ -98,14 +99,17 @@
       <a href="mailto:cucadellumcasarural@gmail.com">nuestro mail.</a>
     </p>
   </v-alert>
-  <AdminHeader />
-  <AdminForm
-    v-model:showEditForm="showEditForm"
-    v-model:selectedReservation="selectedReservation"
-    v-model:showError="showError"
-    v-model:showSuccess="showSuccess"
-  />
-  <AdminTable v-model:showEditForm="showEditForm" @fetchReservation="fetchSelectedReservation" />
+  <div class="container">
+    <AdminHeader />
+    <AdminForm
+      v-model:showEditForm="showEditForm"
+      v-model:selectedReservation="selectedReservation"
+      v-model:showError="showError"
+      v-model:showSuccess="showSuccess"
+    />
+    <AdminTable v-model:showEditForm="showEditForm" @fetchReservation="fetchSelectedReservation" />
+    <AdminDisabledDays />
+  </div>
 </template>
 
 <style scoped>
@@ -135,5 +139,9 @@
     color: #ffffff;
     font-weight: bold;
     text-decoration: none;
+  }
+
+  .container {
+    margin-bottom: 32px;
   }
 </style>

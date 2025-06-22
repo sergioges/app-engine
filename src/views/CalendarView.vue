@@ -48,7 +48,7 @@
   })
 
   onMounted(async () => {
-    await fetchReservations()
+    await fetchReservations({ includeExtraDisabledDates: true })
     if (dbName === config.dbNameTest) isTestPaymentAvailable.value = true
   })
 

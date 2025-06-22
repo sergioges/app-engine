@@ -15,7 +15,7 @@
   const display = useDisplay()
 
   const reservationStore = useReservationStore()
-  const { reservations } = storeToRefs(reservationStore)
+  const { disabledDates } = storeToRefs(reservationStore)
 
   moment.locale('es')
 
@@ -44,22 +44,6 @@
     if (!reservationDates.value || reservationDates.value.length < 2) return 0
     const [start, end] = reservationDates.value
     return moment(end).diff(moment(start), 'days')
-  })
-
-  // Filter reservations with status “pending” or “paid”.
-  const disabledDates = computed(() => {
-    const filteredReservations = reservations.value.filter(
-      reservation => reservation.status === 'paid'
-    )
-
-    // Extract and flatten all the dates from the filtered reservations.
-    const allDates = filteredReservations.flatMap(reservation => reservation.dates)
-
-    // Add the current and the next day to be disabled.
-    const today = moment().startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-    const tomorrow = moment().add(1, 'day').startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
-
-    return [...new Set([...allDates, today, tomorrow])] // Eliminate duplicates.
   })
 
   watch(totalNights, newVal => {

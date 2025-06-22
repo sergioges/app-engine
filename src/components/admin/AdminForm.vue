@@ -18,7 +18,7 @@
 
   const reservationStore = useReservationStore()
   const { fetchReservations, dbName } = reservationStore
-  const { reservations } = storeToRefs(reservationStore)
+  const { disabledDates } = storeToRefs(reservationStore)
 
   moment.locale('es')
 
@@ -39,25 +39,6 @@
     if (!selectedReservation.value.dates || selectedReservation.value.dates.length < 2) return 0
     const [start, end] = selectedReservation.value.dates
     return moment(end).diff(moment(start), 'days')
-  })
-
-  const disabledDates = computed(() => {
-    // Filter reservations with status “pending” or “paid”.
-    const filteredReservations = reservations.value.filter(
-      reservation => reservation.status === 'paid'
-    )
-
-    // Extract and flatten all the dates from the filtered reservations.
-    const allDates = filteredReservations.flatMap(reservation => reservation.dates)
-
-    // Normalize the dates so that all have time set to 00:00 and remove duplicates.
-    const normalizedDates = allDates.map(date => {
-      const normalizedDate = new Date(date)
-      normalizedDate.setHours(0, 0, 0, 0) // Set the time to 00:00.
-      return normalizedDate.toISOString() // Convert to ISO format.
-    })
-
-    return [...new Set(normalizedDates)] // Eliminate duplicates.
   })
 
   const maxDate = computed(() => {
