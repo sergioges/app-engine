@@ -32,7 +32,7 @@
 
   @media (min-width: 960px) {
     .logo {
-      width: 20%;
+      width: 14rem;
     }
   }
 </style>
