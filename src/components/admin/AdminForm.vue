@@ -63,6 +63,24 @@
     return dateFormat
   })
 
+  const completedMailMessage = computed(
+    () =>
+      `Se envía el agradecimiento: ${moment().add(1, 'day').startOf('day').format('DD-MM-YYYY')}`
+  )
+
+  // Should be disabled the completed status, until:
+  // 1. The endDate is bigger than currentDate.
+  // 2. The status is different to paid.
+  // You ensurance to send gratitude and Google opinions to a real conclude reservation.
+  const isCompletedDisabled = computed(() => {
+    if (!selectedReservation.value?.dates?.[1]) return true
+
+    const endDate = moment(selectedReservation.value.dates[1]).startOf('day')
+    const currentDate = moment().startOf('day')
+
+    return endDate.isAfter(currentDate) || selectedReservation.value.status !== 'paid'
+  })
+
   function getTotalNights(dateVal) {
     const message = isMobile.value.value ? `Noches:` : `Total de noches:`
     if (!dateVal || dateVal.length < 2) return message
@@ -137,6 +155,10 @@
       status: ''
     }
   }
+
+  function sendCompltedMail() {
+    selectedReservation.value.status = 'completed'
+  }
 </script>
 
 <template>
@@ -177,7 +199,7 @@
             required
           ></v-text-field>
 
-          <v-row>
+          <v-row class="datepicker-wrapper">
             <v-col cols="12" class="d-flex justify-center mb-4">
               <VueDatePicker
                 v-model="selectedReservation.dates"
@@ -247,8 +269,15 @@
             outlined
             required
           ></v-select>
+          <v-btn color="info" :disabled="isCompletedDisabled" @click="sendCompltedMail">
+            <span v-if="selectedReservation.status !== 'completed'">
+              Enviar agradecimiento y opiniones
+            </span>
+            <span v-else>{{ completedMailMessage }}</span>
+          </v-btn>
         </v-form>
       </v-card-text>
+      <v-divider class="my-4"></v-divider>
       <v-row justify="center" align="center" class="pa-3">
         <v-btn color="success" class="mx-2" @click="updateReservation">Guardar</v-btn>
         <v-btn color="error" class="mx-2" @click="cancelEditReservation">Cancelar</v-btn>
@@ -261,5 +290,10 @@
   .v-card {
     max-width: 600px;
     margin: auto;
+  }
+
+  .datepicker-wrapper {
+    position: relative;
+    z-index: 1000;
   }
 </style>

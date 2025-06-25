@@ -88,6 +88,8 @@
         return 'orange'
       case 'cancelled':
         return 'red'
+      case 'completed':
+        return 'blue'
       default:
         return 'grey'
     }
@@ -101,12 +103,11 @@
         <v-data-table-virtual
           :headers="headers"
           :items="reservations"
-          fixed-header
           height="400"
           class="elevation-1"
         >
           <template v-slot:top>
-            <v-toolbar flat>
+            <v-toolbar>
               <v-toolbar-title>Reservas</v-toolbar-title>
             </v-toolbar>
           </template>
