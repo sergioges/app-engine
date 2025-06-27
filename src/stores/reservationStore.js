@@ -6,6 +6,8 @@ import { collection, getDocs } from 'firebase/firestore'
 
 import { config } from '@plugin/config'
 
+import { parsePhoneNumberFromString } from 'libphonenumber-js'
+
 import moment from 'moment'
 import 'moment/dist/locale/es'
 
@@ -20,6 +22,15 @@ export const useReservationStore = defineStore('reservation', () => {
 
   function setDbName(newDbName) {
     dbName.value = newDbName
+  }
+
+  function normalizePhoneNumber(rawNumber, countryCode = 'MX') {
+    const phoneNumber = parsePhoneNumberFromString(rawNumber, countryCode)
+    if (phoneNumber?.isValid()) {
+      return phoneNumber.format('NATIONAL')
+    } else {
+      return null
+    }
   }
 
   async function fetchReservations(options) {
@@ -38,7 +49,7 @@ export const useReservationStore = defineStore('reservation', () => {
             minute: '2-digit'
           }),
           name: data.name,
-          phone: data.phone,
+          phone: normalizePhoneNumber(data.phone),
           email: data.email,
           dates: data.dates,
           totalNights: data.totalNights,
