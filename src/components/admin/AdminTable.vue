@@ -94,6 +94,37 @@
         return 'grey'
     }
   }
+
+  function downloadCSV() {
+    const csvHeaders = headers.map(header => header.title).join(',')
+    const csvRows = reservations.map(row =>
+      [
+        row.id,
+        row.createdAt,
+        row.name,
+        row.phone,
+        row.email,
+        row.dates && row.dates.length
+          ? `${moment(row.dates[0]).format('DD/MM')}-${moment(row.dates[row.dates.length - 1]).format('DD/MM')}`
+          : '',
+        row.totalNights,
+        row.hosts,
+        row.pets,
+        row.status
+      ]
+        .map(val => `"${val ?? ''}"`)
+        .join(',')
+    )
+    const csvContent = [csvHeaders, ...csvRows].join('\n')
+    // Download and convert to csv file.
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.setAttribute('download', `reservas_${moment().format('DD-MM-YYYY')}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 </script>
 
 <template>
@@ -108,7 +139,11 @@
         >
           <template v-slot:top>
             <v-toolbar>
-              <v-toolbar-title>Reservas</v-toolbar-title>
+              <v-toolbar-title class="text-left">Reservas</v-toolbar-title>
+              <v-spacer />
+              <v-btn color="success" elevation="2" class="mr-4" @click="downloadCSV">
+                Descargar CSV
+              </v-btn>
             </v-toolbar>
           </template>
           <template v-slot:item.id="{ item }">
