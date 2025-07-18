@@ -1,16 +1,16 @@
 <script setup>
   import { ref, onMounted, onUnmounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
 
   import FooterApp from '@/components/FooterApp.vue'
 
   import { db } from '../plugins/firebase'
-  import { auth } from '../plugins/firebase'
   import { updateDoc, doc } from 'firebase/firestore'
-  import { signInWithEmailAndPassword } from 'firebase/auth'
 
   const route = useRoute()
   const router = useRouter()
+  const { t } = useI18n()
 
   import { config } from '@plugin/config'
 
@@ -31,21 +31,13 @@
     return array
   }
 
-  async function loginUser(email, password) {
-    try {
-      await signInWithEmailAndPassword(auth, email, password)
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error.message)
-    }
-  }
-
   async function updateReservationStatus(id) {
     if (!id) return
     try {
       const docRef = doc(db, dbName, id)
       await updateDoc(docRef, { status: 'paid' })
     } catch (error) {
-      console.error('Error al actualizar la reserva:', error)
+      console.error(t('adminForm.error.updateBooking'), error)
     }
   }
 
@@ -58,10 +50,9 @@
     shuffledNumbers.value = shuffleArray([...Array(9).keys()].map(i => i + 1))
 
     try {
-      await loginUser(import.meta.env.VITE_LOGIN_USER, import.meta.env.VITE_LOGIN_PASSWORD)
       await updateReservationStatus(idReservation)
     } catch (error) {
-      console.error('Error durante el proceso de login o actualización:', error)
+      console.error(t('confirmationView.error.loginProcess'), error)
     }
   })
 
@@ -72,19 +63,11 @@
 
 <template>
   <v-container class="confirmation-view">
-    <h1 class="mt-2 mb-4">¡Pago recibido correctamente!</h1>
+    <h1 class="mt-2 mb-4">{{ $t('confirmationView.label.paidReceived') }}</h1>
     <v-row align="center" justify="center">
       <v-col cols="12" md="6" class="content">
-        <p>
-          Hemos recibido tu pago correctamente. En los próximos días nos pondremos en contacto
-          contigo utilizando los datos que nos has proporcionado. Para tener todo listo para tu
-          llegada.
-        </p>
-        <p>
-          Mientras tanto, puedes ir conociendo lo que te espera en Amealco visitando
-          <a href="https://www.quehacerenamealco.com" target="_blank">www.quehacerenamealco.com</a>
-          .
-        </p>
+        <p>{{ $t('confirmationView.message.paidReceived') }}</p>
+        <p v-html="$t('confirmationView.message.visitAmealco')" />
         <a href="https://www.quehacerenamealco.com">
           <img src="../assets/QueHacerEnAmealco.svg" alt="Decorativo" width="180" />
         </a>

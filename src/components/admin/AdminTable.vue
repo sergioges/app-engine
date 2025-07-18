@@ -1,5 +1,9 @@
 <script setup>
+  import { ref, watch } from 'vue'
+
   import { useReservationStore } from '@store/reservationStore'
+
+  import { useI18n } from 'vue-i18n'
 
   import moment from 'moment'
   import 'moment/dist/locale/es'
@@ -7,9 +11,11 @@
   const reservationStore = useReservationStore()
   const { reservations } = reservationStore
 
-  moment.locale('es')
+  const { t, locale } = useI18n()
 
-  const headers = [
+  moment.locale(locale.value)
+
+  const headers = ref([
     {
       align: 'center',
       sortable: false,
@@ -20,19 +26,19 @@
       align: 'center',
       sortable: true,
       key: 'createdAt',
-      title: 'Creación'
+      title: t('adminForm.label.creation')
     },
     {
       align: 'center',
       sortable: true,
       key: 'name',
-      title: 'Nombre'
+      title: t('common.label.name')
     },
     {
       align: 'center',
       sortable: false,
       key: 'phone',
-      title: 'Teléfono'
+      title: t('common.label.phone')
     },
     {
       align: 'center',
@@ -44,33 +50,33 @@
       align: 'center',
       sortable: true,
       key: 'dates',
-      title: 'Reserva'
+      title: t('adminTable.label.booking')
     },
     {
       align: 'center',
       sortable: false,
       key: 'totalNights',
-      title: 'Noches'
+      title: t('adminTable.label.nights')
     },
     {
       align: 'center',
       sortable: false,
       key: 'hosts',
-      title: 'Huespedes'
+      title: t('adminTable.label.hosts')
     },
     {
       align: 'center',
       sortable: false,
       key: 'pets',
-      title: 'Mascotas'
+      title: t('adminForm.label.pets')
     },
     {
       align: 'center',
       sortable: true,
       key: 'status',
-      title: 'Estado'
+      title: t('adminForm.label.status')
     }
-  ]
+  ])
 
   const showEditForm = defineModel('showEditForm')
   const emit = defineEmits(['fetchReservation'])
@@ -96,7 +102,7 @@
   }
 
   function downloadCSV() {
-    const csvHeaders = headers.map(header => header.title).join(',')
+    const csvHeaders = headers.value.map(header => header.title).join(',')
     const csvRows = reservations.map(row =>
       [
         row.id,
@@ -105,7 +111,7 @@
         row.phone,
         row.email,
         row.dates && row.dates.length
-          ? `${moment(row.dates[0]).format('DD/MM')}-${moment(row.dates[row.dates.length - 1]).format('DD/MM')}`
+          ? `${moment(row.dates[0]).format(t('common.label.simplifyFormatDate'))}-${moment(row.dates[row.dates.length - 1]).format(t('common.label.simplifyFormatDate'))}`
           : '',
         row.totalNights,
         row.hosts,
@@ -120,11 +126,42 @@
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.setAttribute('download', `reservas_${moment().format('DD-MM-YYYY')}.csv`)
+    link.setAttribute(
+      'download',
+      `${t('adminTable.label.downloadedFileName')}${moment().format(t('common.label.formatDate'))}.csv`
+    )
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
   }
+
+  watch(locale, newLocale => {
+    moment.locale(newLocale)
+    headers.value = headers.value.map(header => {
+      switch (header.key) {
+        case 'createdAt':
+          return { ...header, title: t('adminForm.label.creation') }
+        case 'name':
+          return { ...header, title: t('common.label.name') }
+        case 'phone':
+          return { ...header, title: t('common.label.phone') }
+        case 'email':
+          return { ...header, title: 'Email' }
+        case 'dates':
+          return { ...header, title: t('adminTable.label.booking') }
+        case 'totalNights':
+          return { ...header, title: t('adminTable.label.nights') }
+        case 'hosts':
+          return { ...header, title: t('adminTable.label.hosts') }
+        case 'pets':
+          return { ...header, title: t('adminForm.label.pets') }
+        case 'status':
+          return { ...header, title: t('adminForm.label.status') }
+        default:
+          return header
+      }
+    })
+  })
 </script>
 
 <template>
@@ -139,10 +176,12 @@
         >
           <template v-slot:top>
             <v-toolbar>
-              <v-toolbar-title class="text-left">Reservas</v-toolbar-title>
+              <v-toolbar-title class="text-left">
+                {{ $t('adminTable.label.bookings') }}
+              </v-toolbar-title>
               <v-spacer />
               <v-btn color="success" elevation="2" class="mr-4" @click="downloadCSV">
-                Descargar CSV
+                {{ $t('adminTable.label.dowload') }}
               </v-btn>
             </v-toolbar>
           </template>
@@ -153,9 +192,13 @@
           </template>
           <template v-slot:item.dates="{ item }">
             <p>
-              {{ moment(item.dates[0]).format('DD/MM') }}
+              {{ moment(item.dates[0]).format($t('common.label.simplifyFormatDate')) }}
               -
-              {{ moment(item.dates[item.dates.length - 1]).format('DD/MM') }}
+              {{
+                moment(item.dates[item.dates.length - 1]).format(
+                  $t('common.label.simplifyFormatDate')
+                )
+              }}
             </p>
           </template>
           <template v-slot:item.status="{ item }">
