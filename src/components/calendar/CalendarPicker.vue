@@ -2,6 +2,8 @@
   import { computed, watch } from 'vue'
   import { storeToRefs } from 'pinia'
 
+  import { useI18n } from 'vue-i18n'
+
   import VueDatePicker from '@vuepic/vue-datepicker'
   import '@vuepic/vue-datepicker/dist/main.css'
 
@@ -13,11 +15,12 @@
   import 'moment/dist/locale/es'
 
   const display = useDisplay()
+  const { t, locale } = useI18n()
 
   const reservationStore = useReservationStore()
   const { disabledDates } = storeToRefs(reservationStore)
 
-  moment.locale('es')
+  moment.locale(locale.value)
 
   const reservationDates = defineModel()
   const emit = defineEmits(['update:totalNights'])
@@ -30,10 +33,12 @@
     if (!reservationDates.value || reservationDates.value.length === 0) return
     let dateFormat
     if (isMobile.value.value) {
-      dateFormat = reservationDates.value.map(d => moment(d).format('DD/MM/YYYY')).join(' --- ')
+      dateFormat = reservationDates.value
+        .map(d => moment(d).format(t('common.label.formatDate')))
+        .join(' --- ')
     } else {
       dateFormat = reservationDates.value
-        .map(d => moment(d).format('DD/MM/YYYY (dddd)'))
+        .map(d => moment(d).format(`${t('common.label.formatDate')} (dddd)`))
         .join(' --- ')
     }
 
@@ -49,6 +54,10 @@
   watch(totalNights, newVal => {
     emit('update:totalNights', newVal)
   })
+
+  watch(locale, newLocale => {
+    moment.locale(newLocale)
+  })
 </script>
 
 <template>
@@ -60,12 +69,12 @@
     :enable-time-picker="false"
     :min-date="new Date()"
     :month-change-on-scroll="false"
-    locale="es"
+    :locale="locale"
     inline
     auto-apply
     :disabled-dates="disabledDates"
   />
-  <p>Selecciona en el calendario, el rango de días que deseas reservar.</p>
+  <p>{{ $t('calendarPicker.message.chooseDate') }}</p>
   <v-text-field
     v-model="formattedDate"
     label="Check-in --- Check-out"
@@ -76,7 +85,7 @@
     hide-details="auto"
     variant="solo"
   ></v-text-field>
-  <p>Total de noches: {{ totalNights }}</p>
+  <p>{{ $t('calendarPicker.label.totalNights', { totalNights }) }}</p>
 </template>
 
 <style lang="css" scoped>

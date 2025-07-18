@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "orderKeys": "node order-translation-keys.js"
   },
   "dependencies": {
     "@getbrevo/brevo": "^2.2.0",
@@ -19,6 +20,7 @@
     "pinia": "^3.0.2",
     "sib-api-v3-sdk": "^8.5.0",
     "vue": "^3.5.13",
+    "vue-i18n": "^11.1.10",
     "vue-router": "^4.5.1",
     "vuetify": "^3.8.4"
   },

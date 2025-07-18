@@ -1,12 +1,34 @@
+<script setup>
+  import { ref, watch } from 'vue'
+  import { useI18n } from 'vue-i18n'
+
+  const { locale } = useI18n()
+
+  const languageSelected = ref('es')
+
+  watch(languageSelected, newLocale => {
+    locale.value = newLocale
+  })
+</script>
+
 <template>
   <a href="https://cuca-de-llum.web.app" target="_blank">
     <v-img src="/cuca-de-llum-logo.png" class="logo" alt="Cuca de Llum logo" contain></v-img>
   </a>
-  <h1 class="text-h4">Reserva tu estancia</h1>
-  <h2 class="text-body-2">
-    En el corazón de Amealco, Quéretaro, se encuentra Cuca de Llum, un lugar mágico donde la
-    naturaleza y la tranquilidad se unen para ofrecerte una experiencia única.
-  </h2>
+  <span class="lang-switcher">
+    <p>Español</p>
+    <v-switch
+      v-model="languageSelected"
+      color="info"
+      label="English"
+      false-value="es"
+      true-value="en"
+      hide-details
+      inset
+    ></v-switch>
+  </span>
+  <h1 class="text-h4">{{ $t('calendarHeader.label.title') }}</h1>
+  <h2 class="text-body-2">{{ $t('calendarHeader.label.description') }}</h2>
 </template>
 
 <style lang="css" scoped>
@@ -44,5 +66,16 @@
     .logo {
       width: 30%;
     }
+  }
+
+  .lang-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -20px 0;
+  }
+
+  .lang-switcher p {
+    padding-right: 12px;
   }
 </style>

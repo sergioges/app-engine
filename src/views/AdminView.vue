@@ -1,5 +1,6 @@
 <script setup>
   import { onMounted, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
 
   import AdminHeader from '@/components/admin/AdminHeader.vue'
   import AdminTable from '@/components/admin/AdminTable.vue'
@@ -11,13 +12,12 @@
 
   import { useReservationStore } from '@store/reservationStore'
 
-  import moment from 'moment'
-  import 'moment/dist/locale/es'
+  import { config } from '@plugin/config'
+
+  const { t } = useI18n()
 
   const reservationStore = useReservationStore()
   const { dbName, fetchReservations } = reservationStore
-
-  moment.locale('es')
 
   const selectedReservation = ref({
     id: '',
@@ -62,11 +62,11 @@
           status: data.status
         }
       } else {
-        console.error('El documento no existe.')
+        console.error(t('adminView.error.documentNoExists'))
         return
       }
     } catch (error) {
-      console.error('Error al actualizar la reserva:', error)
+      console.error(t('adminForm.error.updateBooking'), error)
     }
   }
 
@@ -79,25 +79,22 @@
   <v-alert
     v-if="showSuccess"
     class="toast-alert"
-    title="Hemos recibido tu solicitud de reserva"
+    :title="$t('common.label.bookingReceivedTitle')"
     type="success"
     border="end"
     closable
   >
-    <p>La reserva se ha actualizado con éxito.</p>
+    <p>{{ $t('common.label.bookingReceived') }}</p>
   </v-alert>
   <v-alert
     v-if="showError"
     class="toast-alert"
-    title="Algo ha fallado"
+    :title="$t('common.error.somethingMissing')"
     type="error"
     border="end"
     closable
   >
-    <p>
-      Por favor inténtalo de nuevo más tarde. Para cualquier duda, puedes escribirnos a
-      <a href="mailto:cucadellumcasarural@gmail.com">nuestro mail.</a>
-    </p>
+    <p v-html="$t('common.error.tryAgainWithMail', { email: config.cucaMail })" />
   </v-alert>
   <div class="container">
     <AdminHeader />
@@ -133,12 +130,6 @@
       transform: translateX(-50%);
       width: 90%;
     }
-  }
-
-  .toast-alert a {
-    color: #ffffff;
-    font-weight: bold;
-    text-decoration: none;
   }
 
   .container {

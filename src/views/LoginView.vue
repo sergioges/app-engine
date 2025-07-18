@@ -2,8 +2,13 @@
   import { ref } from 'vue'
   import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
   import { useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
+
+  import { config } from '@plugin/config'
 
   const router = useRouter()
+
+  const { t } = useI18n()
 
   const username = ref('')
   const password = ref('')
@@ -28,7 +33,7 @@
           showError.value = false
         }, 6000)
       }
-      console.error('Error al iniciar sesión:', error.message)
+      console.error(t('loginView.error.loginSession'), error.message)
     }
   }
 </script>
@@ -37,24 +42,23 @@
   <v-alert
     v-if="showError"
     class="toast-alert"
-    title="Algo ha fallado"
+    :title="$t('common.error.somethingMissing')"
     type="error"
     border="end"
     closable
   >
-    <p>
-      Por favor inténtalo de nuevo más tarde. Para cualquier duda, puedes escribirnos a
-      <a href="mailto:cucadellumcasarural@gmail.com">nuestro mail.</a>
-    </p>
+    <p v-html="$t('common.error.tryAgainWithMail', { email: config.cucaMail })" />
   </v-alert>
   <v-container class="align-container">
     <v-row align="start" justify="center">
       <v-col class="d-flex flex-column ga-4" cols="12" md="8">
-        <a href="https://cuca-de-llum.web.app" target="_blank">
+        <a :href="config.cucaLink" target="_blank">
           <v-img src="/cuca-de-llum-logo.png" class="logo" alt="Cuca de Llum logo" contain></v-img>
         </a>
         <v-card class="pa-4">
-          <v-card-title class="text-h5 text-center">Iniciar Sesión</v-card-title>
+          <v-card-title class="text-h5 text-center">
+            {{ $t('loginView.label.loginSession') }}
+          </v-card-title>
           <v-card-text>
             <v-form @submit.prevent="login">
               <v-text-field
@@ -73,7 +77,9 @@
                 required
                 prepend-icon="mdi-lock"
               />
-              <v-btn rounded="lg" color="primary" block type="submit">Iniciar Sesión</v-btn>
+              <v-btn rounded="lg" color="primary" block type="submit">
+                {{ $t('loginView.label.loginSession') }}
+              </v-btn>
             </v-form>
           </v-card-text>
         </v-card>
@@ -125,11 +131,5 @@
       transform: translateX(-50%);
       width: 90%;
     }
-  }
-
-  .toast-alert a {
-    color: #ffffff;
-    font-weight: bold;
-    text-decoration: none;
   }
 </style>
