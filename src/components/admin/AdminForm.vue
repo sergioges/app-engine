@@ -1,7 +1,9 @@
 <script setup>
-  import { computed, ref } from 'vue'
+  import { computed, ref, watch } from 'vue'
   import { storeToRefs } from 'pinia'
   import { useDisplay } from 'vuetify'
+
+  import { useI18n } from 'vue-i18n'
 
   import { db } from '../../plugins/firebase'
   import { updateDoc, doc } from 'firebase/firestore'
@@ -16,11 +18,13 @@
 
   const display = useDisplay()
 
+  const { t, locale } = useI18n()
+
   const reservationStore = useReservationStore()
   const { fetchReservations, dbName } = reservationStore
   const { disabledDates } = storeToRefs(reservationStore)
 
-  moment.locale('es')
+  moment.locale(locale.value)
 
   const reservationStatus = ['paid', 'pending', 'cancelled']
 
@@ -52,11 +56,11 @@
     let dateFormat
     if (isMobile.value.value) {
       dateFormat = selectedReservation.value.dates
-        .map(d => moment(d).format('DD/MM/YYYY'))
+        .map(d => moment(d).format(t('common.label.formatDate')))
         .join(' --- ')
     } else {
       dateFormat = selectedReservation.value.dates
-        .map(d => moment(d).format('DD/MM/YYYY (dddd)'))
+        .map(d => moment(d).format(`${t('common.label.formatDate')} (dddd)`))
         .join(' --- ')
     }
 
@@ -65,7 +69,7 @@
 
   const completedMailMessage = computed(
     () =>
-      `Se envía el agradecimiento: ${moment().add(1, 'day').startOf('day').format('DD-MM-YYYY')}`
+      `${t('adminForm.label.thankfulMessage')} ${moment().add(1, 'day').startOf('day').format(t('common.label.formatDate'))}`
   )
 
   // Should be disabled the completed status, until:
@@ -82,7 +86,9 @@
   })
 
   function getTotalNights(dateVal) {
-    const message = isMobile.value.value ? `Noches:` : `Total de noches:`
+    const message = isMobile.value.value
+      ? t('adminForm.label.nights')
+      : t('adminForm.label.totalNights')
     if (!dateVal || dateVal.length < 2) return message
     const [start, end] = dateVal
     return `${message} ${moment(end).diff(moment(start), 'days')}`
@@ -105,7 +111,7 @@
 
   async function updateReservation() {
     if (!selectedReservation.value.id) {
-      console.error('El ID de la reserva no está definido.')
+      console.error(t('adminForm.error.idNotIdentified'))
       return
     }
 
@@ -136,7 +142,7 @@
         showError.value = false
         cancelEditReservation()
       }, 5000)
-      console.error('Error al actualizar la reserva:', error)
+      console.error(t('adminForm.error.updateBooking'), error)
     }
   }
 
@@ -159,17 +165,21 @@
   function sendCompltedMail() {
     selectedReservation.value.status = 'completed'
   }
+
+  watch(locale, newLocale => {
+    moment.locale(newLocale)
+  })
 </script>
 
 <template>
   <v-container v-if="showEditForm">
     <v-card class="pa-4">
-      <v-card-title class="text-h5">Editar Reserva</v-card-title>
+      <v-card-title class="text-h5">{{ t('adminForm.label.updateBooking') }}</v-card-title>
       <v-card-text>
         <v-form ref="form" v-model="valid">
           <v-text-field
             v-model="selectedReservation.createdAt"
-            label="Creación"
+            :label="t('adminForm.label.creation')"
             prepend-icon="mdi-account-wrench"
             outlined
             readonly
@@ -177,7 +187,7 @@
 
           <v-text-field
             v-model="selectedReservation.name"
-            label="Nombre"
+            :label="t('common.label.name')"
             prepend-icon="mdi-rename"
             outlined
             required
@@ -185,7 +195,7 @@
 
           <v-text-field
             v-model="selectedReservation.phone"
-            label="Teléfono"
+            :label="t('common.label.phone')"
             prepend-icon="mdi-phone-outgoing"
             outlined
             required
@@ -208,10 +218,10 @@
                 range
                 format="dd/MM/yyyy"
                 :enable-time-picker="false"
-                locale="es"
+                :locale="locale"
                 teleport-center
-                cancelText="Cancelar"
-                selectText="Seleccionar"
+                :cancelText="t('common.label.cancel')"
+                :selectText="t('common.label.select')"
                 :disabled-dates="disabledDates"
               >
                 <template #trigger>
@@ -225,14 +235,18 @@
                   ></v-text-field>
                 </template>
                 <template #right-sidebar>
-                  <p>Fechas escogidas previamente:</p>
+                  <p>{{ t('adminForm.label.previousDates') }}</p>
                   <p>
-                    {{ moment(selectedReservation.dates[0]).format('DD/MM') }}
+                    {{
+                      moment(selectedReservation.dates[0]).format(
+                        t('common.label.simplifyFormatDate')
+                      )
+                    }}
                     -
                     {{
                       moment(
                         selectedReservation.dates[selectedReservation.dates.length - 1]
-                      ).format('DD/MM')
+                      ).format(t('common.label.simplifyFormatDate'))
                     }}
                   </p>
                 </template>
@@ -245,7 +259,7 @@
 
           <v-text-field
             v-model="selectedReservation.hosts"
-            label="Huéspedes"
+            :label="t('calendarForm.label.hosts')"
             prepend-icon="mdi-account-multiple"
             outlined
             required
@@ -254,7 +268,7 @@
 
           <v-text-field
             v-model="selectedReservation.pets"
-            label="Mascotas"
+            :label="t('adminForm.label.pets')"
             prepend-icon="mdi-paw"
             outlined
             required
@@ -264,14 +278,14 @@
           <v-select
             v-model="selectedReservation.status"
             :items="reservationStatus"
-            label="Estado"
+            :label="t('adminForm.label.status')"
             prepend-icon="mdi-list-status"
             outlined
             required
           ></v-select>
           <v-btn color="info" :disabled="isCompletedDisabled" @click="sendCompltedMail">
             <span v-if="selectedReservation.status !== 'completed'">
-              Enviar agradecimiento y opiniones
+              {{ t('adminForm.label.sendThankfulMessage') }}
             </span>
             <span v-else>{{ completedMailMessage }}</span>
           </v-btn>
@@ -279,8 +293,12 @@
       </v-card-text>
       <v-divider class="my-4"></v-divider>
       <v-row justify="center" align="center" class="pa-3">
-        <v-btn color="success" class="mx-2" @click="updateReservation">Guardar</v-btn>
-        <v-btn color="error" class="mx-2" @click="cancelEditReservation">Cancelar</v-btn>
+        <v-btn color="success" class="mx-2" @click="updateReservation">
+          {{ t('common.label.save') }}
+        </v-btn>
+        <v-btn color="error" class="mx-2" @click="cancelEditReservation">
+          {{ t('common.label.cancel') }}
+        </v-btn>
       </v-row>
     </v-card>
   </v-container>

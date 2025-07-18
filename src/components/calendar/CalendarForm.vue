@@ -1,6 +1,7 @@
 <script setup>
   import { ref, computed, reactive, onMounted, watch } from 'vue'
   import { useRoute } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
 
   import { db } from '@/plugins/firebase'
   import { collection, addDoc, updateDoc } from 'firebase/firestore'
@@ -16,10 +17,12 @@
 
   const route = useRoute()
 
+  const { t, locale } = useI18n()
+
   const reservationStore = useReservationStore()
   const { dbName } = reservationStore
 
-  moment.locale('es')
+  moment.locale(locale.value)
 
   const props = defineProps({
     totalNights: {
@@ -47,12 +50,14 @@
   const countdown = ref(0)
 
   const emailValidation = ref([
-    v => !!v || 'Falta tu email',
-    v => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v) || 'Email inválido'
+    v => !!v || t('common.validation.missingEmail'),
+    v =>
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v) ||
+      t('common.validation.invalidEmail')
   ])
   const phoneValidation = ref([
-    v => !!v || 'Falta tu teléfono',
-    v => /^\d{10}$/.test(v) || 'Teléfono inválido (debe ser un número mexicano válido)'
+    v => !!v || t('common.validation.missingPhone'),
+    v => /^\d{10}$/.test(v) || t('common.validation.invalidPhone')
   ])
 
   const formattedCountdown = computed(() => {
@@ -143,7 +148,7 @@
         setTimeout(() => {
           showError.value = false
         }, 6000)
-        console.error('Error al guardar la reserva:', error)
+        console.error(t('calendarForm.error.saveBooking'), error)
       }
     }
   }
@@ -195,6 +200,10 @@
   watch(isWeekdaysOnly, newVal => {
     emit('weekDays', newVal)
   })
+
+  watch(locale, newLocale => {
+    moment.locale(newLocale)
+  })
 </script>
 
 <template>
@@ -207,7 +216,7 @@
               v-model="hosts"
               :reverse="false"
               controlVariant="split"
-              label="Número de huéspedes"
+              :label="$t('calendarForm.label.hosts')"
               prepend-icon="mdi-account-multiple-check"
               :hideInput="false"
               :min="1"
@@ -219,20 +228,20 @@
           <v-col cols="12" md="6">
             <v-select
               v-model="pets"
-              label="¿Llevas mascotas?"
-              :items="['Si', 'No']"
+              :label="$t('calendarForm.label.pets')"
+              :items="[$t('common.label.yes'), $t('common.label.no')]"
               prepend-icon="mdi-paw"
               variant="solo"
               hide-details="auto"
             ></v-select>
           </v-col>
         </v-row>
-        <p>Datos de contacto</p>
+        <p>{{ $t('calendarForm.label.contact') }}</p>
         <v-text-field
           v-model="contactData.name"
           required
-          :rules="[v => !!v || 'Falta tu nombre']"
-          label="Nombre"
+          :rules="[v => !!v || $t('common.validation.missingName')]"
+          :label="$t('common.label.name')"
           prepend-icon="mdi-account-box-edit-outline"
           hide-details="auto"
           variant="solo"
@@ -250,7 +259,7 @@
           v-model="contactData.phone"
           required
           :rules="phoneValidation"
-          label="Móvil"
+          :label="$t('common.label.phone')"
           prepend-icon="mdi-cellphone"
           hide-details="auto"
           variant="solo"
@@ -259,7 +268,7 @@
         <v-checkbox
           v-model="contactData.marketingEnabled"
           color="success"
-          label="¿Te gustaría recibir información de Amealco y conocer nuestras promociones?"
+          :label="t('calendarForm.message.askingMarketing')"
           class="text-left"
           hide-details="auto"
           variant="solo"
@@ -269,11 +278,11 @@
     <v-row v-if="!isPaymentAvailable || props.totalNights >= 6" class="d-flex justify-center">
       <v-col cols="12" md="6">
         <v-btn color="success" block :disabled="props.totalNights === 0" @click="sendData">
-          Solicitar reserva
+          {{ $t('calendarForm.label.submitBooking') }}
         </v-btn>
       </v-col>
       <v-col cols="12" md="6">
-        <v-btn color="error" block @click="resetData">Borrar</v-btn>
+        <v-btn color="error" block @click="resetData">{{ $t('common.label.delete') }}</v-btn>
       </v-col>
     </v-row>
     <v-row
@@ -282,7 +291,7 @@
       justify="center"
     >
       <v-col cols="12" md="6">
-        <p>Tienes {{ formattedCountdown }} minutos para realizar el pago.</p>
+        <p>{{ $t('calendarForm.label.minutesToPay', formattedCountdown) }}</p>
         <br />
         <div v-show="props.totalNights === 1" class="stripe-btn">
           <stripe-buy-button
@@ -316,10 +325,7 @@
         </div>
       </v-col>
       <v-col cols="12" md="6">
-        <p>
-          Si prefieres realizar el pago mediante transferencia bancaria. Envía un mensaje vía
-          Whatsapp.
-        </p>
+        <p>{{ $t('calendarForm.message.sendBankTransfer') }}</p>
         <v-btn
           density="default"
           color="primary"
@@ -327,10 +333,12 @@
           class="text-none mt-6 contact-btn"
           @click="sendWhatsapp"
         >
-          Contacta
+          {{ $t('common.label.contact') }}
         </v-btn>
       </v-col>
-      <v-btn class="reset-btn" color="error" @click="resetData">Borrar</v-btn>
+      <v-btn class="reset-btn" color="error" @click="resetData">
+        {{ $t('common.label.delete') }}
+      </v-btn>
     </v-row>
     <v-row v-if="isTestPaymentAvailable && isPaymentAvailable" align="center" justify="center">
       <v-col cols="12" md="6">
@@ -343,8 +351,7 @@
       </v-col>
       <v-col cols="12" md="6">
         <p>
-          Si prefieres realizar el pago mediante transferencia bancaria. Envía un mensaje vía
-          Whatsapp.
+          {{ $t('calendarForm.message.sendBankTransfer') }}
         </p>
         <v-btn
           density="default"
@@ -353,10 +360,12 @@
           class="text-none mt-6 contact-btn"
           @click="sendWhatsapp"
         >
-          Contacta
+          {{ $t('common.label.contact') }}
         </v-btn>
       </v-col>
-      <v-btn class="reset-btn" color="error" @click="resetData">Borrar</v-btn>
+      <v-btn class="reset-btn" color="error" @click="resetData">
+        {{ $t('common.label.delete') }}
+      </v-btn>
     </v-row>
   </v-form>
 </template>

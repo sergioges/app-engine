@@ -2,6 +2,8 @@
   import { computed, onMounted, ref } from 'vue'
   import { storeToRefs } from 'pinia'
 
+  import { useI18n } from 'vue-i18n'
+
   import { db } from '@/plugins/firebase'
   import { collection, addDoc, updateDoc, getDocs, doc } from 'firebase/firestore'
 
@@ -14,6 +16,8 @@
 
   import moment from 'moment'
   import 'moment/dist/locale/es'
+
+  const { t, locale } = useI18n()
 
   const reservationStore = useReservationStore()
   const { reservedDates } = storeToRefs(reservationStore)
@@ -34,7 +38,7 @@
         date: formattedDate,
         type: 'line',
         color: 'red',
-        tooltip: [{ text: 'Reservada' }]
+        tooltip: [{ text: t('adminDisabledDays.label.reserved') }]
       }
     })
 
@@ -45,7 +49,7 @@
         date: formattedDate,
         type: 'line',
         color: 'blue',
-        tooltip: [{ text: 'Bloqueada' }]
+        tooltip: [{ text: t('adminDisabledDays.label.blocked') }]
       }
     })
 
@@ -74,7 +78,7 @@
       // Need this return to know if there is a previous collection DDBB.
       return idCollection
     } catch (error) {
-      console.error('Error al obtener fechas bloqueadas', error)
+      console.error(t('adminDisabledDays.error.getBlockedDays'), error)
     }
   }
 
@@ -108,7 +112,7 @@
       }
 
       showSuccess.value = true
-      successMessage.value = 'Fecha bloqueada correctamente.'
+      successMessage.value = t('adminDisabledDays.label.blockedSuccess')
       setTimeout(() => {
         showSuccess.value = false
       }, 6000)
@@ -117,7 +121,7 @@
       setTimeout(() => {
         showError.value = false
       }, 6000)
-      console.error('Error al guardar la fecha bloqueada', error)
+      console.error(t('adminDisabledDays.error.saveBlockedDays'), error)
     } finally {
       orderedblockedDates.value = sortedDates
       selectedBlockedDates.value = []
@@ -137,7 +141,7 @@
         setTimeout(() => {
           showError.value = false
         }, 6000)
-        console.error('No hay fechas bloqueadas para eliminar')
+        console.error(t('adminDisabledDays.error.noBlockedDays'))
         return
       }
 
@@ -165,12 +169,12 @@
       await updateDoc(docRef, blockedDatesData)
 
       showSuccess.value = true
-      successMessage.value = 'Fecha desbloqueada correctamente.'
+      successMessage.value = t('adminDisabledDays.label.blockedSuccess')
       setTimeout(() => {
         showSuccess.value = false
       }, 6000)
     } catch (error) {
-      console.error('Error al desbloquear fechas:', error)
+      console.error(t('adminDisabledDays.error.reopenDays'), error)
       showError.value = true
       setTimeout(() => {
         showError.value = false
@@ -198,16 +202,16 @@
   <v-alert
     v-if="showError"
     class="toast-alert"
-    title="Algo ha fallado"
+    :title="t('common.error.somethingMissing')"
     type="error"
     border="end"
     closable
   >
-    <p>Vuelve a intentarlo de nuevo.</p>
+    <p>{{ t('common.error.tryAgain') }}</p>
   </v-alert>
   <div class="disabled-days">
-    <h2>Deshabilitar fechas</h2>
-    <p>Selecciona en el calendario, el rango de días que deseas bloquear.</p>
+    <h2>{{ t('adminDisabledDays.label.disableDays') }}</h2>
+    <p>{{ t('adminDisabledDays.label.selectDisabledDays') }}</p>
     <VueDatePicker
       v-model="selectedBlockedDates"
       class="date-picker w-100"
@@ -216,7 +220,7 @@
       :enable-time-picker="false"
       :min-date="new Date()"
       :month-change-on-scroll="false"
-      locale="es"
+      :locale="locale"
       inline
       auto-apply
       :markers="markers"
@@ -228,10 +232,14 @@
     </VueDatePicker>
     <v-row justify="center" class="px-5">
       <v-col cols="12" md="3" class="pa-2">
-        <v-btn @click="addBlockedDates" color="error" block>Bloquear fechas</v-btn>
+        <v-btn @click="addBlockedDates" color="error" block>
+          {{ t('adminDisabledDays.label.blockDays') }}
+        </v-btn>
       </v-col>
       <v-col cols="12" md="3" class="pa-2">
-        <v-btn @click="eliminateBlockedDates" color="info" block>Desbloquear fechas</v-btn>
+        <v-btn @click="eliminateBlockedDates" color="info" block>
+          {{ t('adminDisabledDays.label.reopenDays') }}
+        </v-btn>
       </v-col>
     </v-row>
   </div>
@@ -258,12 +266,6 @@
       transform: translateX(-50%);
       width: 90%;
     }
-  }
-
-  .toast-alert a {
-    color: #ffffff;
-    font-weight: bold;
-    text-decoration: none;
   }
 
   .disabled-days {

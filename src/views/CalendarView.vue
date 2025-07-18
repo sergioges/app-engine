@@ -1,5 +1,6 @@
 <script setup>
   import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+  import { useI18n } from 'vue-i18n'
 
   import CalendarHeader from '@/components/calendar/CalendarHeader.vue'
   import CalendarPicker from '@/components/calendar/CalendarPicker.vue'
@@ -13,10 +14,12 @@
   import moment from 'moment'
   import 'moment/dist/locale/es'
 
+  const { t, locale } = useI18n()
+
   const reservationStore = useReservationStore()
   const { dbName, fetchReservations } = reservationStore
 
-  moment.locale('es')
+  moment.locale(locale.value)
 
   const reservationDates = ref([])
   const countdown = ref(0)
@@ -62,40 +65,29 @@
     <v-alert
       v-if="showSuccess"
       class="toast-alert"
-      title="Hemos recibido tu solicitud de reserva"
+      :title="$t('common.label.bookingReceivedTitle')"
       type="success"
       border="end"
       closable
     >
-      <p v-if="totalNights >= 6">
-        Tan pronto revisemos tu solucitud nos pondremos en conacto contigo. Si lo deseas, puedes
-        escribirnos a
-        <a href="mailto:cucadellumcasarural@gmail.com">nuestro mail.</a>
-      </p>
+      <p
+        v-if="totalNights >= 6"
+        v-html="t('common.label.bookingReceivedWithMail', { email: config.cucaMail })"
+      />
       <div v-else>
-        <p>
-          Ahora continua con el proceso de pago. Recuerda que tienes
-          {{ formattedCountdown }} minutos para realizarlo.
-        </p>
-        <p v-if="isWeeksDaysOnly">
-          Ahhh!!! y como vemos que has hecho una reserva entre semana, tienes el cupón
-          <strong>VERANO25 donde te ofrecemos un 30% de descuento</strong>
-          en el total de la reserva.
-        </p>
+        <p>{{ $t('calendarView.message.continueWithTheProcess', { formattedCountdown }) }}</p>
+        <p v-if="isWeeksDaysOnly" v-html="$t('calendarView.message.summerOffer')" />
       </div>
     </v-alert>
     <v-alert
       v-if="showError"
       class="toast-alert"
-      title="Algo ha fallado"
+      :title="$t('common.error.somethingMissing')"
       type="error"
       border="end"
       closable
     >
-      <p>
-        Por favor inténtalo de nuevo más tarde. Para cualquier duda, puedes escribirnos a
-        <a href="mailto:cucadellumcasarural@gmail.com">nuestro mail.</a>
-      </p>
+      <p v-html="$t('common.error.tryAgainWithMail', { email: config.cucaMail })" />
     </v-alert>
     <v-row align="start" justify="center" class="mt-5">
       <v-col class="d-flex flex-column ga-4" cols="12" md="8">
@@ -137,11 +129,5 @@
       transform: translateX(-50%);
       width: 90%;
     }
-  }
-
-  .toast-alert a {
-    color: #ffffff;
-    font-weight: bold;
-    text-decoration: none;
   }
 </style>

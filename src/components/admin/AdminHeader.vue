@@ -1,21 +1,42 @@
 <script setup>
+  import { ref, watch } from 'vue'
   import { useRouter } from 'vue-router'
+  import { useI18n } from 'vue-i18n'
 
   const router = useRouter()
+  const { locale } = useI18n()
+
+  const languageSelected = ref('es')
 
   function closeSession() {
     localStorage.removeItem('authToken')
     router.push('/calendar')
   }
+
+  watch(languageSelected, newLocale => {
+    locale.value = newLocale
+  })
 </script>
 
 <template>
   <v-img src="/cuca-de-llum-logo.png" class="logo" alt="Cuca de Llum logo" contain></v-img>
-  <h1>Control de reservas</h1>
-  <p>Esta es la vista de todas tus reservas registradas</p>
+  <span class="lang-switcher">
+    <p>Español</p>
+    <v-switch
+      v-model="languageSelected"
+      color="info"
+      label="English"
+      false-value="es"
+      true-value="en"
+      hide-details
+      inset
+    ></v-switch>
+  </span>
+  <h1>{{ $t('adminHeader.label.bookingControl') }}</h1>
+  <p>{{ $t('adminHeader.label.bookingView') }}</p>
   <v-row justify="center">
     <v-col class="mt-4">
-      <v-btn @click="closeSession" color="error">Cerrar sesión</v-btn>
+      <v-btn @click="closeSession" color="error">{{ $t('adminHeader.label.closeSession') }}</v-btn>
     </v-col>
   </v-row>
 </template>
@@ -34,5 +55,15 @@
     .logo {
       width: 14rem;
     }
+  }
+
+  .lang-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lang-switcher p {
+    padding-right: 12px;
   }
 </style>

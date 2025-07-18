@@ -37,18 +37,14 @@
     <v-divider class="my-2" thickness="2" width="50"></v-divider>
 
     <div class="text-caption font-weight-regular opacity-60">
-      Aunque suene curioso, “Cuca de Llum” no es una expresión típica mexicana, ¡pero tiene una
-      historia muy especial! En algunas zonas de habla catalana (Cataluña, España), “Cuca de llum”
-      significa literalmente luciérnaga. Es una forma poética y tierna de referirse a ese pequeño
-      insecto que brilla en la oscuridad. La palabra “llum” significa luz, y “cuca” puede referirse
-      a un bichito.
+      {{ $t('footerApp.message.cucaDescription') }}
     </div>
 
     <v-divider></v-divider>
 
     <div>
       {{ new Date().getFullYear() }} —
-      <strong>Cuca de Llum - Casa de Campo</strong>
+      <strong>{{ $t('footerApp.label.cucaName') }}</strong>
     </div>
     <em class="reservame">
       Powered by:
