@@ -2,13 +2,16 @@
   import { onMounted, ref } from 'vue'
   import { useI18n } from 'vue-i18n'
 
+  import moment from 'moment'
+  import 'moment/dist/locale/es'
+
   import AdminHeader from '@/components/admin/AdminHeader.vue'
   import AdminTable from '@/components/admin/AdminTable.vue'
   import AdminForm from '@/components/admin/AdminForm.vue'
   import AdminDisabledDays from '@/components/admin/AdminDisabledDays.vue'
 
   import { db } from '../plugins/firebase'
-  import { doc, getDoc } from 'firebase/firestore'
+  import { doc, getDoc, updateDoc } from 'firebase/firestore'
 
   import { useReservationStore } from '@store/reservationStore'
 
@@ -17,7 +20,7 @@
   const { t } = useI18n()
 
   const reservationStore = useReservationStore()
-  const { dbName, fetchReservations } = reservationStore
+  const { dbName, reservations, fetchReservations } = reservationStore
 
   const selectedReservation = ref({
     id: '',
@@ -35,6 +38,7 @@
   const showEditForm = ref(false)
   const showSuccess = ref(false)
   const showError = ref(false)
+  const isReservationsLoaded = ref(false)
 
   async function fetchSelectedReservation(id) {
     showEditForm.value = true
@@ -70,8 +74,41 @@
     }
   }
 
+  function updateExpiredReservationsStatus() {
+    const today = moment().utc().startOf('day').toISOString()
+
+    reservations.forEach(reservation => {
+      const dates = reservation.dates
+      if (
+        reservation.status === 'pending' &&
+        moment(today).isSameOrAfter(moment(dates[dates.length - 1]), 'day')
+      ) {
+        updateReservation(reservation)
+      }
+    })
+  }
+
+  async function updateReservation(reservation) {
+    if (!reservation.id) {
+      console.error(t('adminForm.error.idNotIdentified'))
+      return
+    }
+
+    try {
+      const reservationRef = doc(db, dbName, reservation.id)
+      await updateDoc(reservationRef, {
+        status: 'cancelled'
+      })
+      await fetchReservations()
+    } catch (error) {
+      console.error(t('adminForm.error.updateBooking'), error)
+    }
+  }
+
   onMounted(async () => {
     await fetchReservations()
+    updateExpiredReservationsStatus()
+    isReservationsLoaded.value = true
   })
 </script>
 
@@ -104,7 +141,11 @@
       v-model:showError="showError"
       v-model:showSuccess="showSuccess"
     />
-    <AdminTable v-model:showEditForm="showEditForm" @fetchReservation="fetchSelectedReservation" />
+    <AdminTable
+      v-if="isReservationsLoaded"
+      v-model:showEditForm="showEditForm"
+      @fetchReservation="fetchSelectedReservation"
+    />
     <AdminDisabledDays />
   </div>
 </template>
