@@ -169,7 +169,7 @@
 
   function sendWhatsapp() {
     window.open(
-      `https://api.whatsapp.com/send?phone=${config.whatsApp}&text=Hola!%20Acabo%20de%20realizar%20una%20reserva%20para%20Cuca%20de%20Llum...`,
+      `https://api.whatsapp.com/send?phone=${config.whatsApp}&text=${config.textWhatsAppPayment}`,
       '_blank'
     )
   }

@@ -171,7 +171,7 @@
         <v-data-table-virtual
           :headers="headers"
           :items="reservations"
-          height="400"
+          height="500"
           class="elevation-1"
         >
           <template v-slot:top>
