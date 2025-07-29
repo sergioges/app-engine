@@ -4,15 +4,15 @@
   const footerIcons = [
     {
       icon: 'mdi-whatsapp',
-      url: `https://api.whatsapp.com/send?phone=${config.whatsApp}&text=Hola!%20Estoy%20interesad@%20en%20recibir%20más%20información%20de%20Cuca%20de%20Llum.`
+      url: `https://api.whatsapp.com/send?phone=${config.whatsApp}&text=${config.textWhatsAppInterested}`
     },
     {
       icon: 'mdi-mail',
-      url: 'mailto:cucadellumcasarural@gmail.com'
+      url: `mailto:${config.email}`
     },
     {
       icon: 'mdi-instagram',
-      url: 'https://www.instagram.com/cucadellumcasadecampo/'
+      url: `https://www.instagram.com/${config.instagram}`
     }
   ]
 

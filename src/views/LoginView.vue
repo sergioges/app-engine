@@ -47,12 +47,12 @@
     border="end"
     closable
   >
-    <p v-html="$t('common.error.tryAgainWithMail', { email: config.cucaMail })" />
+    <p v-html="$t('common.error.tryAgainWithMail', { email: config.email })" />
   </v-alert>
   <v-container class="align-container">
     <v-row align="start" justify="center">
       <v-col class="d-flex flex-column ga-4" cols="12" md="8">
-        <a :href="config.cucaLink" target="_blank">
+        <a :href="config.webUrl" target="_blank">
           <v-img src="/cuca-de-llum-logo.png" class="logo" alt="Cuca de Llum logo" contain></v-img>
         </a>
         <v-card class="pa-4">

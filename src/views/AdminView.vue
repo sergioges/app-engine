@@ -131,7 +131,7 @@
     border="end"
     closable
   >
-    <p v-html="$t('common.error.tryAgainWithMail', { email: config.cucaMail })" />
+    <p v-html="$t('common.error.tryAgainWithMail', { email: config.email })" />
   </v-alert>
   <div class="container">
     <AdminHeader />

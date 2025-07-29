@@ -72,7 +72,7 @@
     >
       <p
         v-if="totalNights >= 6"
-        v-html="t('common.label.bookingReceivedWithMail', { email: config.cucaMail })"
+        v-html="t('common.label.bookingReceivedWithMail', { email: config.email })"
       />
       <div v-else>
         <p>{{ $t('calendarView.message.continueWithTheProcess', { formattedCountdown }) }}</p>
@@ -87,7 +87,7 @@
       border="end"
       closable
     >
-      <p v-html="$t('common.error.tryAgainWithMail', { email: config.cucaMail })" />
+      <p v-html="$t('common.error.tryAgainWithMail', { email: config.email })" />
     </v-alert>
     <v-row align="start" justify="center" class="mt-5">
       <v-col class="d-flex flex-column ga-4" cols="12" md="8">
