@@ -44,7 +44,7 @@
   "calendarPicker.label.totalNights": "Total nights: {totalNights}",
   "calendarPicker.message.chooseDate": "Select the range of days you wish to reserve on the calendar.",
   "calendarView.message.continueWithTheProcess": "Now continue with the payment process. Remember you have {formattedCountdown} minutes to complete it.",
-  "calendarView.message.summerOffer": "Ahhh!!! And since we see you made a reservation during the week, you have the coupon <strong>VERANO25, where we offer you a 30% discount</strong> on the total reservation.",
+  "calendarView.message.summerOffer": "Ahhh!!! And since we see you made a reservation during the week, you have the coupon <strong>VERANO25, where we offer you a 20% discount</strong> on the total reservation.",
   "common.error.somethingMissing": "Something has gone wrong",
   "common.error.tryAgain": "Please try again later.",
   "common.error.tryAgainWithMail": "Please try again later. If you have any questions, please write to us at <a style='color: white; text-decoration: underline' href='mailto:{email}'>our email.</a>",
