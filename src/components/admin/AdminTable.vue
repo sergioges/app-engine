@@ -15,6 +15,7 @@
 
   moment.locale(locale.value)
 
+  const search = ref('')
   const headers = ref([
     {
       align: 'center',
@@ -67,8 +68,8 @@
     {
       align: 'center',
       sortable: false,
-      key: 'pets',
-      title: t('adminForm.label.pets')
+      key: 'aquisition',
+      title: t('adminForm.label.aquisition')
     },
     {
       align: 'center',
@@ -116,6 +117,7 @@
         row.totalNights,
         row.hosts,
         row.pets,
+        row.aquisition,
         row.status
       ]
         .map(val => `"${val ?? ''}"`)
@@ -155,6 +157,8 @@
           return { ...header, title: t('adminTable.label.hosts') }
         case 'pets':
           return { ...header, title: t('adminForm.label.pets') }
+        case 'aquisition':
+          return { ...header, title: t('adminForm.label.aquisition') }
         case 'status':
           return { ...header, title: t('adminForm.label.status') }
         default:
@@ -162,16 +166,22 @@
       }
     })
   })
+
+  function clearSearch() {
+    search.value = ''
+  }
 </script>
 
 <template>
   <v-container class="data-table">
     <v-row>
       <v-col>
-        <v-data-table-virtual
+        <v-data-table
           :headers="headers"
           :items="reservations"
-          height="500"
+          :items-per-page="10"
+          :page="1"
+          :search="search"
           class="elevation-1"
         >
           <template v-slot:top>
@@ -180,6 +190,20 @@
                 {{ $t('adminTable.label.bookings') }}
               </v-toolbar-title>
               <v-spacer />
+              <v-text-field
+                v-model="search"
+                class="search-box"
+                :label="$t('adminTable.label.search')"
+                color="info"
+                prepend-inner-icon="mdi-magnify"
+                clear-icon="mdi-close-circle-outline"
+                hide-details
+                single-line
+                clearable
+                variant="underlined"
+                @click:clear="clearSearch"
+              ></v-text-field>
+              <v-spacer />
               <v-btn color="success" elevation="2" class="mr-4" @click="downloadCSV">
                 {{ $t('adminTable.label.dowload') }}
               </v-btn>
@@ -187,7 +211,7 @@
           </template>
           <template v-slot:item.id="{ item }">
             <v-btn color="primary" @click="fetchSelectedReservation(item.id)">
-              {{ item.id.slice(-5) }}
+              {{ $t('adminTable.label.edit') }}
             </v-btn>
           </template>
           <template v-slot:item.dates="{ item }">
@@ -201,12 +225,18 @@
               }}
             </p>
           </template>
+          <template v-slot:item.aquisition="{ item }">
+            <v-chip v-if="item.aquisition" color="info" text-color="white">
+              {{ item.aquisition }}
+            </v-chip>
+            <v-chip v-else color="grey" text-color="white">-</v-chip>
+          </template>
           <template v-slot:item.status="{ item }">
             <v-chip :color="setStatusColor(item.status)" text-color="white">
               {{ item.status }}
             </v-chip>
           </template>
-        </v-data-table-virtual>
+        </v-data-table>
       </v-col>
     </v-row>
   </v-container>
@@ -215,5 +245,9 @@
 <style lang="css" scoped>
   .data-table {
     max-width: max-content;
+  }
+
+  .search-box {
+    width: 300px;
   }
 </style>

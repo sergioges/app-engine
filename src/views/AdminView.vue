@@ -32,6 +32,7 @@
     totalNights: 0,
     hosts: 0,
     pets: 0,
+    aquisition: '',
     status: ''
   })
 
@@ -63,6 +64,7 @@
           totalNights: data.totalNights,
           hosts: data.hosts,
           pets: data.pets,
+          aquisition: data.aquisition,
           status: data.status
         }
       } else {

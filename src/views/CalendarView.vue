@@ -104,6 +104,12 @@
         />
       </v-col>
     </v-row>
+    <div
+      class="elfsight-app-efdd0c83-1496-4861-b798-8a33dcf2fa7b"
+      data-elfsight-app-lazy
+      style="z-index: 0"
+    ></div>
+    <div class="white-div"></div>
     <FooterApp />
   </v-container>
 </template>
@@ -129,5 +135,14 @@
       transform: translateX(-50%);
       width: 90%;
     }
+  }
+
+  .white-div {
+    background-color: white;
+    height: 40px;
+    position: relative;
+    z-index: 10;
+    margin-top: -50px;
+    margin-right: -20px;
   }
 </style>

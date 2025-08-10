@@ -26,7 +26,8 @@
 
   moment.locale(locale.value)
 
-  const reservationStatus = ['paid', 'pending', 'cancelled']
+  const statusItems = ['paid', 'pending', 'cancelled']
+  const aquisitionItems = ['WhatsApp', 'Airbnb', 'Instagram', 'Web', 'email', 'Phone', 'Other']
 
   const showEditForm = defineModel('showEditForm')
   const selectedReservation = defineModel('selectedReservation')
@@ -128,6 +129,7 @@
         totalNights: totalNights.value,
         hosts: selectedReservation.value.hosts,
         pets: selectedReservation.value.pets,
+        aquisition: selectedReservation.value.aquisition || '',
         status: selectedReservation.value.status
       })
       showSuccess.value = true
@@ -158,6 +160,7 @@
       totalNights: 0,
       hosts: 0,
       pets: 0,
+      aquisition: '',
       status: ''
     }
   }
@@ -276,8 +279,16 @@
           ></v-text-field>
 
           <v-select
+            v-model="selectedReservation.aquisition"
+            :items="aquisitionItems"
+            :label="t('adminForm.label.aquisition')"
+            prepend-icon="mdi-tag-plus"
+            outlined
+          ></v-select>
+
+          <v-select
             v-model="selectedReservation.status"
-            :items="reservationStatus"
+            :items="statusItems"
             :label="t('adminForm.label.status')"
             prepend-icon="mdi-list-status"
             outlined
