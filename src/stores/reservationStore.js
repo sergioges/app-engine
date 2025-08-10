@@ -55,6 +55,7 @@ export const useReservationStore = defineStore('reservation', () => {
           totalNights: data.totalNights,
           hosts: data.hosts,
           pets: data.pets,
+          aquisition: data.aquisition,
           status: data.status
         })
       })
