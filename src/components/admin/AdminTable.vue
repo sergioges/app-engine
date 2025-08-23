@@ -85,6 +85,11 @@
   async function fetchSelectedReservation(id) {
     showEditForm.value = true
     emit('fetchReservation', id)
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
   }
 
   function setStatusColor(status) {

@@ -17,6 +17,8 @@
 
   import { config } from '@plugin/config'
 
+  import { parsePhoneNumberFromString } from 'libphonenumber-js'
+
   const { t } = useI18n()
 
   const reservationStore = useReservationStore()
@@ -41,6 +43,11 @@
   const showError = ref(false)
   const isReservationsLoaded = ref(false)
 
+  function getNationalPhone(rawNumber, countryCode = 'MX') {
+    const phoneNumber = parsePhoneNumberFromString(rawNumber, countryCode)
+    return phoneNumber?.isValid() ? phoneNumber.nationalNumber : null
+  }
+
   async function fetchSelectedReservation(id) {
     showEditForm.value = true
     try {
@@ -58,7 +65,7 @@
             minute: '2-digit'
           }),
           name: data.name,
-          phone: data.phone,
+          phone: getNationalPhone(data.phone),
           email: data.email,
           dates: [data.dates[0], data.dates[data.dates.length - 1]],
           totalNights: data.totalNights,
