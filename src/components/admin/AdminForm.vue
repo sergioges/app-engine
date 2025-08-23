@@ -10,6 +10,8 @@
 
   import { useReservationStore } from '@store/reservationStore'
 
+  import { parsePhoneNumberFromString } from 'libphonenumber-js'
+
   import moment from 'moment'
   import 'moment/dist/locale/es'
 
@@ -34,7 +36,18 @@
   const showError = defineModel('showError')
   const showSuccess = defineModel('showSuccess')
 
-  const valid = ref(false)
+  const form = ref(null)
+
+  const emailValidation = ref([
+    v => !!v || t('adminForm.validation.missingEmail'),
+    v =>
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v) ||
+      t('common.validation.invalidEmail')
+  ])
+  const phoneValidation = ref([
+    v => !!v || t('adminForm.validation.missingPhone'),
+    v => /^\d{10}$/.test(v) || t('common.validation.invalidPhone')
+  ])
 
   const isMobile = computed(() => display.smAndDown)
   // eslint-disable-next-line no-unused-vars
@@ -111,40 +124,44 @@
   }
 
   async function updateReservation() {
+    const { valid } = await form.value.validate()
+
     if (!selectedReservation.value.id) {
       console.error(t('adminForm.error.idNotIdentified'))
       return
     }
 
-    try {
-      const reservationRef = doc(db, dbName, selectedReservation.value.id)
-      await updateDoc(reservationRef, {
-        name: selectedReservation.value.name,
-        phone: selectedReservation.value.phone,
-        email: selectedReservation.value.email,
-        dates: getDatesInRange(
-          selectedReservation.value.dates[0],
-          selectedReservation.value.dates[1]
-        ),
-        totalNights: totalNights.value,
-        hosts: selectedReservation.value.hosts,
-        pets: selectedReservation.value.pets,
-        aquisition: selectedReservation.value.aquisition || '',
-        status: selectedReservation.value.status
-      })
-      showSuccess.value = true
-      setTimeout(() => {
-        showSuccess.value = false
-      }, 5000)
-      await fetchReservations()
-      cancelEditReservation()
-    } catch (error) {
-      showError.value = true
-      setTimeout(() => {
-        showError.value = false
+    if (valid) {
+      try {
+        const reservationRef = doc(db, dbName, selectedReservation.value.id)
+        await updateDoc(reservationRef, {
+          name: selectedReservation.value.name,
+          phone: normalizePhoneNumber(selectedReservation.value.phone),
+          email: selectedReservation.value.email,
+          dates: getDatesInRange(
+            selectedReservation.value.dates[0],
+            selectedReservation.value.dates[1]
+          ),
+          totalNights: totalNights.value,
+          hosts: selectedReservation.value.hosts,
+          pets: selectedReservation.value.pets,
+          aquisition: selectedReservation.value.aquisition || '',
+          status: selectedReservation.value.status
+        })
+        showSuccess.value = true
+        setTimeout(() => {
+          showSuccess.value = false
+        }, 5000)
+        await fetchReservations()
         cancelEditReservation()
-      }, 5000)
-      console.error(t('adminForm.error.updateBooking'), error)
+      } catch (error) {
+        showError.value = true
+        setTimeout(() => {
+          showError.value = false
+          cancelEditReservation()
+        }, 5000)
+        console.error(t('adminForm.error.updateBooking'), error)
+      }
     }
   }
 
@@ -169,6 +186,11 @@
     selectedReservation.value.status = 'completed'
   }
 
+  function normalizePhoneNumber(rawNumber, countryCode = 'MX') {
+    const phoneNumber = parsePhoneNumberFromString(rawNumber, countryCode)
+    return phoneNumber?.isValid() ? phoneNumber.number : null
+  }
+
   watch(locale, newLocale => {
     moment.locale(newLocale)
   })
@@ -179,7 +201,7 @@
     <v-card class="pa-4">
       <v-card-title class="text-h5">{{ t('adminForm.label.updateBooking') }}</v-card-title>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="form">
           <v-text-field
             v-model="selectedReservation.createdAt"
             :label="t('adminForm.label.creation')"
@@ -191,6 +213,7 @@
           <v-text-field
             v-model="selectedReservation.name"
             :label="t('common.label.name')"
+            :rules="[v => !!v || $t('adminForm.validation.missingName')]"
             prepend-icon="mdi-rename"
             outlined
             required
@@ -199,6 +222,7 @@
           <v-text-field
             v-model="selectedReservation.phone"
             :label="t('common.label.phone')"
+            :rules="phoneValidation"
             prepend-icon="mdi-phone-outgoing"
             outlined
             required
@@ -207,6 +231,7 @@
           <v-text-field
             v-model="selectedReservation.email"
             label="Email"
+            :rules="emailValidation"
             prepend-icon="mdi-email-arrow-right"
             outlined
             required
@@ -259,24 +284,26 @@
               </VueDatePicker>
             </v-col>
           </v-row>
-
           <v-text-field
             v-model="selectedReservation.hosts"
             :label="t('calendarForm.label.hosts')"
+            :min="1"
+            :max="4"
+            :rules="[v => !!v || $t('adminForm.validation.missingHosts')]"
             prepend-icon="mdi-account-multiple"
             outlined
             required
             type="number"
           ></v-text-field>
 
-          <v-text-field
+          <v-select
             v-model="selectedReservation.pets"
-            :label="t('adminForm.label.pets')"
+            :label="$t('adminForm.label.pets')"
+            :items="[$t('common.label.yes'), $t('common.label.no')]"
             prepend-icon="mdi-paw"
             outlined
             required
-            type="string"
-          ></v-text-field>
+          ></v-select>
 
           <v-select
             v-model="selectedReservation.aquisition"

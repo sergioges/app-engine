@@ -50,13 +50,13 @@
   const countdown = ref(0)
 
   const emailValidation = ref([
-    v => !!v || t('common.validation.missingEmail'),
+    v => !!v || t('calendarForm.validation.missingEmail'),
     v =>
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v) ||
       t('common.validation.invalidEmail')
   ])
   const phoneValidation = ref([
-    v => !!v || t('common.validation.missingPhone'),
+    v => !!v || t('calendarForm.validation.missingPhone'),
     v => /^\d{10}$/.test(v) || t('common.validation.invalidPhone')
   ])
 
@@ -240,7 +240,7 @@
         <v-text-field
           v-model="contactData.name"
           required
-          :rules="[v => !!v || $t('common.validation.missingName')]"
+          :rules="[v => !!v || $t('calendarForm.validation.missingName')]"
           :label="$t('common.label.name')"
           prepend-icon="mdi-account-box-edit-outline"
           hide-details="auto"
