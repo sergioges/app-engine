@@ -56,7 +56,8 @@ export const useReservationStore = defineStore('reservation', () => {
           hosts: data.hosts,
           pets: data.pets,
           aquisition: data.aquisition,
-          status: data.status
+          status: data.status,
+          hostNotes: data.hostNotes
         })
       })
       getReservedDates()
