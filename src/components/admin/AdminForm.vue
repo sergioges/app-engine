@@ -83,7 +83,7 @@
 
   const completedMailMessage = computed(
     () =>
-      `${t('adminForm.label.thankfulMessage')} ${moment().add(1, 'day').startOf('day').format(t('common.label.formatDate'))}`
+      `${t('adminForm.label.thankfulMessage')} ${moment(selectedReservation.value.thankfulDate).format(t('common.label.formatDate'))}`
   )
 
   // Should be disabled the completed status, until:
@@ -147,7 +147,8 @@
           pets: selectedReservation.value.pets,
           aquisition: selectedReservation.value.aquisition || '',
           status: selectedReservation.value.status,
-          hostNotes: selectedReservation.value.hostNotes
+          hostNotes: selectedReservation.value.hostNotes,
+          thankfulDate: selectedReservation.value.thankfulDate
         })
         showSuccess.value = true
         setTimeout(() => {
@@ -180,12 +181,18 @@
       pets: 0,
       aquisition: '',
       status: '',
-      hostNotes: ''
+      hostNotes: '',
+      thankfulDate: ''
     }
   }
 
   function sendCompltedMail() {
+    const normalizedDate = moment()
+      .add(1, 'day')
+      .startOf('day')
+      .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]')
     selectedReservation.value.status = 'completed'
+    selectedReservation.value.thankfulDate = normalizedDate
   }
 
   function normalizePhoneNumber(rawNumber, countryCode = 'MX') {
