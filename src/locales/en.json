@@ -81,5 +81,6 @@
   "footerApp.label.cucaName": "Cuca de Llum - Casa de Campo",
   "footerApp.message.cucaDescription": "Although it may sound strange, “Cuca de Llum” isn't a typical Mexican expression, but it has a very special history! In some Catalan-speaking areas (Catalonia, Spain), “Cuca de llum” literally means firefly. It's a poetic and tender way of referring to that small insect that glows in the dark. The word “llum” means light, and “cuca” can refer to a small bug.",
   "loginView.error.loginSession": "Login error:",
-  "loginView.label.loginSession": "Login"
+  "loginView.label.loginSession": "Login",
+  "adminForm.label.hostNotes": "Host notes"
 }

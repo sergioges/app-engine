@@ -146,7 +146,8 @@
           hosts: selectedReservation.value.hosts,
           pets: selectedReservation.value.pets,
           aquisition: selectedReservation.value.aquisition || '',
-          status: selectedReservation.value.status
+          status: selectedReservation.value.status,
+          hostNotes: selectedReservation.value.hostNotes
         })
         showSuccess.value = true
         setTimeout(() => {
@@ -178,7 +179,8 @@
       hosts: 0,
       pets: 0,
       aquisition: '',
-      status: ''
+      status: '',
+      hostNotes: ''
     }
   }
 
@@ -321,6 +323,14 @@
             outlined
             required
           ></v-select>
+
+          <v-textarea
+            v-model="selectedReservation.hostNotes"
+            :label="t('adminForm.label.hostNotes')"
+            clearable
+            clear-icon="mdi-close-circle"
+            prepend-icon="mdi-comment"
+          ></v-textarea>
           <v-btn color="info" :disabled="isCompletedDisabled" @click="sendCompltedMail">
             <span v-if="selectedReservation.status !== 'completed'">
               {{ t('adminForm.label.sendThankfulMessage') }}

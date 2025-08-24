@@ -35,7 +35,8 @@
     hosts: 0,
     pets: 0,
     aquisition: '',
-    status: ''
+    status: '',
+    hostNotes: ''
   })
 
   const showEditForm = ref(false)
@@ -72,7 +73,8 @@
           hosts: data.hosts,
           pets: data.pets,
           aquisition: data.aquisition,
-          status: data.status
+          status: data.status,
+          hostNotes: data.hostNotes
         }
       } else {
         console.error(t('adminView.error.documentNoExists'))

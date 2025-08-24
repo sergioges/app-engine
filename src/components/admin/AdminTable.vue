@@ -68,6 +68,13 @@
     {
       align: 'center',
       sortable: false,
+      key: 'pets',
+      title: t('adminForm.label.pets'),
+      hidden: true
+    },
+    {
+      align: 'center',
+      sortable: false,
       key: 'aquisition',
       title: t('adminForm.label.aquisition')
     },
@@ -76,6 +83,13 @@
       sortable: true,
       key: 'status',
       title: t('adminForm.label.status')
+    },
+    {
+      align: 'center',
+      sortable: false,
+      key: 'hostNotes',
+      title: t('adminForm.label.hostNotes'),
+      hidden: true
     }
   ])
 
@@ -123,7 +137,8 @@
         row.hosts,
         row.pets,
         row.aquisition,
-        row.status
+        row.status,
+        row.hostNotes
       ]
         .map(val => `"${val ?? ''}"`)
         .join(',')
@@ -166,6 +181,8 @@
           return { ...header, title: t('adminForm.label.aquisition') }
         case 'status':
           return { ...header, title: t('adminForm.label.status') }
+        case 'hostNotes':
+          return { ...header, title: t('adminForm.label.hostNotes') }
         default:
           return header
       }
@@ -182,7 +199,7 @@
     <v-row>
       <v-col>
         <v-data-table
-          :headers="headers"
+          :headers="headers.filter(h => !h.hidden)"
           :items="reservations"
           :items-per-page="10"
           :page="1"
