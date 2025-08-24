@@ -205,6 +205,7 @@
           :page="1"
           :search="search"
           class="elevation-1"
+          :sort-by="[{ key: 'status', order: 'desc' }]"
         >
           <template v-slot:top>
             <v-toolbar>

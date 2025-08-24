@@ -72,9 +72,10 @@
           totalNights: data.totalNights,
           hosts: data.hosts,
           pets: data.pets,
-          aquisition: data.aquisition,
+          aquisition: data.aquisition || '',
           status: data.status,
-          hostNotes: data.hostNotes
+          hostNotes: data.hostNotes || '',
+          thankfulDate: data.thankfulDate || ''
         }
       } else {
         console.error(t('adminView.error.documentNoExists'))
